@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { EditorNavbar } from "@/components/editor/editor-navbar";
-import { ProjectSidebar } from "@/components/editor/project-sidebar";
+import { EditorNavbar } from "./editor-navbar";
+import { ProjectSidebar } from "./project-sidebar";
 
-export default function Home() {
+export function EditorShell({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
@@ -17,9 +17,7 @@ export default function Home() {
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
-      <main className="flex flex-1 items-center justify-center pt-12 text-copy-muted text-sm">
-        Canvas area
-      </main>
+      {children}
     </div>
   );
 }
