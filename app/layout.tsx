@@ -25,31 +25,33 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        theme: dark,
-        variables: {
-          colorBackground: "var(--bg-surface)",
-          colorInput: "var(--bg-elevated)",
-          colorInputForeground: "var(--text-primary)",
-          colorForeground: "var(--text-primary)",
-          colorMutedForeground: "var(--text-muted)",
-          colorPrimary: "var(--accent-primary)",
-          colorDanger: "var(--state-error)",
-          colorSuccess: "var(--state-success)",
-          colorWarning: "var(--state-warning)",
-          colorBorder: "var(--border-default)",
-          fontFamily: "inherit",
-          borderRadius: "var(--radius)",
-        },
-      }}
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <html
-        lang="en"
-        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      >
-        <body className="min-h-full flex flex-col bg-base font-sans">{children}</body>
-      </html>
-    </ClerkProvider>
+      <body className="min-h-full flex flex-col bg-base font-sans">
+        <ClerkProvider
+          appearance={{
+            theme: dark,
+            variables: {
+              colorBackground: "var(--bg-surface)",
+              colorInput: "var(--bg-elevated)",
+              colorInputForeground: "var(--text-primary)",
+              colorForeground: "var(--text-primary)",
+              colorMutedForeground: "var(--text-muted)",
+              colorPrimary: "var(--accent-primary)",
+              colorDanger: "var(--state-error)",
+              colorSuccess: "var(--state-success)",
+              colorWarning: "var(--state-warning)",
+              colorBorder: "var(--border-default)",
+              fontFamily: "inherit",
+              borderRadius: "var(--radius)",
+            },
+          }}
+        >
+          {children}
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

@@ -9,6 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+/context/feature-specs/current-issue.md
 
 # testing
 /coverage
