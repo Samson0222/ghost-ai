@@ -9,6 +9,15 @@ interface ProjectSidebarProps {
   onClose: () => void;
 }
 
+/**
+ * Render a fixed left sidebar for project navigation containing tabbed sections and a "New Project" action.
+ *
+ * Displays "Projects" header with a close button, tabbed content for "My Projects" and "Shared", and an action button to create a new project.
+ *
+ * @param isOpen - Whether the sidebar is visible
+ * @param onClose - Callback invoked when the close button is clicked
+ * @returns The rendered project sidebar element
+ */
 export function ProjectSidebar({ isOpen, onClose }: ProjectSidebarProps) {
   return (
     <aside

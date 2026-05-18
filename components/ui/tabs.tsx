@@ -5,6 +5,14 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Render a tabs root element that applies shared container styling and exposes orientation metadata.
+ *
+ * @param className - Additional CSS classes merged with the component's default container classes
+ * @param orientation - Layout orientation for the tabs; `"horizontal"` or `"vertical"`. Defaults to `"horizontal"`.
+ * @param props - Additional props forwarded to `TabsPrimitive.Root`
+ * @returns A `TabsPrimitive.Root` element with default container classes and a `data-orientation` attribute corresponding to `orientation`
+ */
 function Tabs({
   className,
   orientation = "horizontal",
@@ -39,6 +47,13 @@ const tabsListVariants = cva(
   }
 )
 
+/**
+ * Render a styled tabs list that applies variant-based classes and forwards all native list props.
+ *
+ * @param className - Additional class names to merge with the component's computed styles
+ * @param variant - Visual style variant for the tabs list; supported values: `"default"`, `"line"`. Defaults to `"default"`.
+ * @returns A `TabsPrimitive.List` element with composed classes and forwarded props
+ */
 function TabsList({
   className,
   variant = "default",
@@ -54,6 +69,12 @@ function TabsList({
   )
 }
 
+/**
+ * Renders a styled tab trigger element that forwards all received props.
+ *
+ * @param className - Additional class names to merge with the component's built-in styles
+ * @returns A tab trigger element with consolidated styling for states (hover, focus, active, disabled, orientation, variant) and all other props forwarded
+ */
 function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   return (
     <TabsPrimitive.Tab
@@ -70,6 +91,12 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   )
 }
 
+/**
+ * Renders a tab panel element styled for content areas.
+ *
+ * @param className - Additional CSS classes merged with the component's default content styling
+ * @returns The rendered tab panel element with composed classes and forwarded props
+ */
 function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   return (
     <TabsPrimitive.Panel

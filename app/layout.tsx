@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   description: "Real-time collaborative system design workspace",
 };
 
+/**
+ * Application root layout that applies global fonts and wraps page content with EditorShell.
+ *
+ * Renders the top-level `<html>` and `<body>` elements, applies Geist Sans and Geist Mono font
+ * CSS variables plus base layout classes, and places `children` inside the `EditorShell`.
+ *
+ * @param children - Page content to render inside the `EditorShell`
+ * @returns A JSX element representing the application's root HTML layout
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

@@ -2,6 +2,12 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Render a styled container used as the root of a Card UI, providing layout, spacing, and visual affordances for composed Card subcomponents.
+ *
+ * @param size - Controls compactness and spacing of the card. Accepts `"default"` (regular spacing) or `"sm"` (reduced spacing).
+ * @returns A React `div` element configured as the Card container with `data-slot="card"` and `data-size` set to `size`.
+ */
 function Card({
   className,
   size = "default",
@@ -20,6 +26,12 @@ function Card({
   )
 }
 
+/**
+ * Renders a styled container for a card's header slot.
+ *
+ * @param className - Optional additional class names to merge with the component's default utility classes
+ * @returns A `<div>` element with `data-slot="card-header"` and layout, spacing, and responsive classes applied
+ */
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -33,6 +45,13 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Renders a card title container with heading typography and size-aware styling.
+ *
+ * Applies heading font weight, base text size, and tighter line-height, and reduces the text size when the parent `Card` has `data-size="sm"`. Accepts all standard `div` props (including `className`) which are merged into the element.
+ *
+ * @returns The rendered card title `div` element.
+ */
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -46,6 +65,11 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Renders a styled container for a card's description.
+ *
+ * @returns A `div` element with `data-slot="card-description"` and muted description typography classes
+ */
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -56,6 +80,13 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Renders a positioned wrapper for action controls within a Card.
+ *
+ * @param className - Additional CSS classes to merge with the component's positioning classes
+ * @param props - Other HTML `div` props applied to the rendered element
+ * @returns A `div` element with `data-slot="card-action"` and positioning classes that place its content in the top-right area of the card
+ */
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -69,6 +100,12 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Renders a container for card content with horizontal padding that adjusts when the parent card's `data-size` is `sm`, and sets `data-slot="card-content"`.
+ *
+ * @param className - Additional CSS classes to merge with the default padding classes.
+ * @returns The rendered `div` element for the card's content slot.
+ */
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -79,6 +116,11 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Renders a card footer container with footer-specific layout and styling.
+ *
+ * @returns A `div` element with `data-slot="card-footer"` that provides a horizontal flex layout, rounded bottom corners, top border, muted background, and size-dependent padding.
+ */
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
