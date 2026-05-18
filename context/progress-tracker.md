@@ -4,25 +4,26 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 02: Editor Chrome — complete
+- Feature 03: Authentication — complete
 
 ## Current Goal
 
-- Authentication and route protection (Clerk).
+- Next: Projects and dashboard (Feature 04, TBD).
 
 ## Completed
 
 - Cleaned up Next.js boilerplate (stripped globals.css, removed SVGs, replaced page.tsx with minimal stub).
 - **Design system** — shadcn/ui initialized, all 7 UI primitive components added (Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea), lucide-react installed, `lib/utils.ts` with `cn()` in place, `globals.css` rewritten as dark-only with full design system token set.
 - **Editor chrome** — `EditorNavbar` (fixed top bar, PanelLeftOpen/Close toggle), `ProjectSidebar` (fixed floating overlay, slide-in from left, My Projects / Shared tabs, New Project button), `EditorDialog` (reusable dialog pattern with title/description/footer slots). Components wired in `app/page.tsx`.
+- **Authentication** — Clerk wired in: `ClerkProvider` in root layout with `dark` theme from `@clerk/ui/themes` and CSS variable overrides; `proxy.ts` at project root using `clerkMiddleware` and `createRouteMatcher` to protect all non-auth routes; sign-in and sign-up pages at `/sign-in` and `/sign-up` with two-panel layout (logo + feature list left, Clerk form right; form-only on small screens); `/` redirects to `/editor`; `UserButton` in editor navbar right section. Editor moved to `app/(editor)/editor/page.tsx`; auth pages isolated in `app/(auth)/`.
 
 ## In Progress
 
-- None yet.
+- None.
 
 ## Next Up
 
-- Authentication and route protection (Clerk).
+- Projects: list, creation, ownership (TBD feature spec).
 
 ## Open Questions
 
@@ -33,9 +34,13 @@ Update this file whenever the current phase, active feature, or implementation s
 - Dark only — no light mode. All color tokens defined in `globals.css` as CSS custom properties, mapped to Tailwind via `@theme inline`. shadcn variables point to design system tokens so components inherit the dark theme automatically.
 - shadcn components live in `components/ui/` and are not modified after generation.
 - `--radius` base is `0.75rem`; `@theme inline` derives `radius-xl/2xl/3xl/4xl` from it to match the border-radius scale in ui-context.md.
+- Route groups: `app/(auth)/` for sign-in and sign-up pages (no EditorShell); `app/(editor)/` for the editor workspace (EditorShell via group layout). Root layout provides only ClerkProvider + html/body; no page-level chrome.
+- `proxy.ts` (Next.js 16 name for middleware) defines public routes from `NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `NEXT_PUBLIC_CLERK_SIGN_UP_URL` env vars; all other routes are protected by `auth.protect()`.
 
 ## Session Notes
 
 - Next.js 16.2.6 + Tailwind v4 (`@tailwindcss/postcss`, `@import "tailwindcss"` in globals.css — no tailwind.config.js).
 - shadcn 4.7.0 supports Tailwind v4 natively; uses CSS variable tokens in globals.css.
 - Design system Tailwind utilities: `bg-base`, `bg-surface`, `bg-elevated`, `bg-subtle`, `text-copy-primary`, `text-copy-secondary`, `text-copy-muted`, `text-copy-faint`, `bg-brand`, `text-brand`, `bg-ai`, `text-ai-text`, `bg-success`/`warning`/`error`, `border-border-subtle`.
+- Clerk v7 (`@clerk/nextjs@7.3.5`) — `clerkMiddleware` exported from `@clerk/nextjs/server`; `ClerkProvider`, `SignIn`, `SignUp`, `UserButton` from `@clerk/nextjs`. `dark` theme from `@clerk/ui/themes`.
+- In Next.js 16, `middleware.ts` is renamed to `proxy.ts` — same API, new filename convention.
