@@ -23,6 +23,7 @@ export function ProjectSidebar({ isOpen, onClose }: ProjectSidebarProps) {
           size="icon-sm"
           onClick={onClose}
           className="text-copy-muted hover:text-copy-primary"
+          aria-label="Close sidebar"
         >
           <X className="h-4 w-4" />
         </Button>
