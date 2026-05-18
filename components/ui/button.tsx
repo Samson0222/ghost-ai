@@ -40,6 +40,14 @@ const buttonVariants = cva(
   }
 )
 
+/**
+ * Render a styled button that applies variant and size class variants and forwards all other props to the base button primitive.
+ *
+ * @param className - Additional class names to merge with the computed variant/size classes
+ * @param variant - Visual style variant to apply (e.g., `"default"`, `"outline"`, `"secondary"`, `"ghost"`, `"destructive"`, `"link"`)
+ * @param size - Size variant to apply (e.g., `"default"`, `"xs"`, `"sm"`, `"lg"`, `"icon"`, `"icon-xs"`, `"icon-sm"`, `"icon-lg"`)
+ * @returns A ButtonPrimitive React element with computed classes, `data-slot="button"`, and all other props forwarded
+ */
 function Button({
   className,
   variant = "default",

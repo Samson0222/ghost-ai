@@ -15,6 +15,17 @@ interface EditorDialogProps extends Pick<ComponentProps<typeof Dialog>, "open" |
   footer?: ReactNode;
 }
 
+/**
+ * Render a modal dialog with a title, optional description, optional body content, and optional footer.
+ *
+ * @param open - Controlled open state for the dialog.
+ * @param onOpenChange - Callback invoked when the dialog open state changes; receives the new open value.
+ * @param title - The dialog title text.
+ * @param description - Optional description text shown under the title.
+ * @param children - Optional body content rendered between the header and footer.
+ * @param footer - Optional footer content rendered inside the dialog footer.
+ * @returns A React element representing the configured dialog.
+ */
 export function EditorDialog({
   open,
   onOpenChange,
