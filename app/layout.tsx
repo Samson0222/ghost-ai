@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { EditorShell } from "@/components/editor/editor-shell";
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/ui/themes";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,28 +19,37 @@ export const metadata: Metadata = {
   description: "Real-time collaborative system design workspace",
 };
 
-/**
- * Application root layout that applies global fonts and wraps page content with EditorShell.
- *
- * Renders the top-level `<html>` and `<body>` elements, applies Geist Sans and Geist Mono font
- * CSS variables plus base layout classes, and places `children` inside the `EditorShell`.
- *
- * @param children - Page content to render inside the `EditorShell`
- * @returns A JSX element representing the application's root HTML layout
- */
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    <ClerkProvider
+      appearance={{
+        theme: dark,
+        variables: {
+          colorBackground: "var(--bg-surface)",
+          colorInput: "var(--bg-elevated)",
+          colorInputForeground: "var(--text-primary)",
+          colorForeground: "var(--text-primary)",
+          colorMutedForeground: "var(--text-muted)",
+          colorPrimary: "var(--accent-primary)",
+          colorDanger: "var(--state-error)",
+          colorSuccess: "var(--state-success)",
+          colorWarning: "var(--state-warning)",
+          colorBorder: "var(--border-default)",
+          fontFamily: "inherit",
+          borderRadius: "var(--radius)",
+        },
+      }}
     >
-      <body className="min-h-full flex flex-col">
-        <EditorShell>{children}</EditorShell>
-      </body>
-    </html>
+      <html
+        lang="en"
+        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      >
+        <body className="min-h-full flex flex-col bg-base font-sans">{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
