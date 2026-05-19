@@ -4,11 +4,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 03: Authentication — complete
+- Feature 04: Project Dialogs — in progress
 
 ## Current Goal
 
-- Next: Projects and dashboard (Feature 04, TBD).
+- Build editor home screen, project create/rename/delete dialogs, and sidebar actions (mock data only).
 
 ## Completed
 
@@ -19,11 +19,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## In Progress
 
-- None.
+- Feature 04: Project Dialogs — editor home screen, create/rename/delete dialogs, sidebar project actions with mobile backdrop.
 
 ## Next Up
 
-- Projects: list, creation, ownership (TBD feature spec).
+- Continue with next feature spec after Feature 04 ships.
 
 ## Open Questions
 
