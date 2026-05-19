@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 05: Prisma — complete
+- Feature 07: Wire Editor Home — complete
 
 ## Current Goal
 
@@ -18,6 +18,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - **Authentication** — Clerk wired in: `ClerkProvider` in root layout with `dark` theme from `@clerk/ui/themes` and CSS variable overrides; `proxy.ts` at project root using `clerkMiddleware` and `createRouteMatcher` to protect all non-auth routes; sign-in and sign-up pages at `/sign-in` and `/sign-up` with two-panel layout (logo + feature list left, Clerk form right; form-only on small screens); `/` redirects to `/editor`; `UserButton` in editor navbar right section. Editor moved to `app/(editor)/editor/page.tsx`; auth pages isolated in `app/(auth)/`.
 - **Project dialogs (Feature 04)** — editor home screen with project grid, create/rename/delete dialogs, sidebar project actions with mobile backdrop. Mock data only.
 - **Prisma (Feature 05)** — `prisma/models/project.prisma` with `Project` and `ProjectCollaborator` models; `lib/prisma.ts` cached singleton branching on `prisma+postgres://` (Accelerate) vs direct `@prisma/adapter-pg`; migration `20260519061317_init` applied; client generated to `app/generated/prisma`.
+- **Project APIs (Feature 06)** — `app/api/projects/route.ts` (GET list, POST create); `app/api/projects/[projectId]/route.ts` (PATCH rename, DELETE). Clerk `auth()` enforces 401 for unauthenticated requests; owner check enforces 403 for non-owner mutations. POST defaults missing name to `'Untitled Project'`. `npm run build` passes.
+- **Wire Editor Home (Feature 07)** — `lib/projects.ts` with `getMyProjects()`/`getSharedProjects()` server helpers and `ProjectRecord` interface; `EditorLayout` is now a server component that fetches both lists and passes to `EditorShell`; `EditorShell` accepts project props and uses `useProjectActions` (replacing mock `useProjectDialogs`); `hooks/use-project-actions.ts` calls real API endpoints — POST creates and navigates to `/editor/[id]`, PATCH renames and calls `router.refresh()`, DELETE redirects to `/editor` if deleting active workspace else refreshes; `editor/page.tsx` is a server component using `NewProjectButton` (client component) for the create trigger; `ProjectSidebar` uses `ProjectRecord` type, removed mock data; dialogs updated to use `ProjectRecord`; create dialog shows Room ID preview (slugified name + per-session suffix). `npm run build` passes.
 
 ## In Progress
 
@@ -25,7 +27,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Continue with next feature spec after Feature 05.
+- Continue with next feature spec after Feature 07.
 
 ## Open Questions
 

@@ -7,7 +7,7 @@ interface CreateProjectDialogProps {
   onOpenChange: (open: boolean) => void;
   projectName: string;
   onProjectNameChange: (name: string) => void;
-  slug: string;
+  roomId: string;
   isLoading: boolean;
   onSubmit: () => void;
 }
@@ -17,7 +17,7 @@ export function CreateProjectDialog({
   onOpenChange,
   projectName,
   onProjectNameChange,
-  slug,
+  roomId,
   isLoading,
   onSubmit,
 }: CreateProjectDialogProps) {
@@ -32,7 +32,7 @@ export function CreateProjectDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
             Cancel
           </Button>
-          <Button onClick={onSubmit} disabled={!projectName.trim() || isLoading}>
+          <Button onClick={onSubmit} disabled={isLoading}>
             Create project
           </Button>
         </>
@@ -43,14 +43,18 @@ export function CreateProjectDialog({
           placeholder="Project name"
           value={projectName}
           onChange={(e) => onProjectNameChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !isLoading) {
+              e.preventDefault();
+              onSubmit();
+            }
+          }}
           autoFocus
         />
-        {slug && (
-          <p className="text-xs text-copy-muted font-mono">
-            <span className="text-copy-faint">Slug: </span>
-            {slug}
-          </p>
-        )}
+        <p className="text-xs text-copy-muted font-mono">
+          <span className="text-copy-faint">Room ID: </span>
+          {roomId}
+        </p>
       </div>
     </EditorDialog>
   );
