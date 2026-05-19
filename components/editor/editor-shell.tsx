@@ -7,14 +7,21 @@ import { ProjectDialogContext } from "./project-dialog-context";
 import { CreateProjectDialog } from "./create-project-dialog";
 import { RenameProjectDialog } from "./rename-project-dialog";
 import { DeleteProjectDialog } from "./delete-project-dialog";
-import { useProjectDialogs } from "@/hooks/use-project-dialogs";
+import { useProjectActions } from "@/hooks/use-project-actions";
+import type { ProjectRecord } from "@/lib/projects";
 
-export function EditorShell({ children }: { children: React.ReactNode }) {
+interface EditorShellProps {
+  children: React.ReactNode;
+  myProjects: ProjectRecord[];
+  sharedProjects: ProjectRecord[];
+}
+
+export function EditorShell({ children, myProjects, sharedProjects }: EditorShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const dialogs = useProjectDialogs();
+  const actions = useProjectActions();
 
   return (
-    <ProjectDialogContext.Provider value={{ openCreate: dialogs.openCreate }}>
+    <ProjectDialogContext.Provider value={{ openCreate: actions.openCreate }}>
       <div className="flex h-screen flex-col bg-base">
         <EditorNavbar
           isSidebarOpen={isSidebarOpen}
@@ -23,40 +30,41 @@ export function EditorShell({ children }: { children: React.ReactNode }) {
         <ProjectSidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
-          myProjects={dialogs.myProjects}
-          onCreateProject={dialogs.openCreate}
-          onRenameProject={dialogs.openRename}
-          onDeleteProject={dialogs.openDelete}
+          myProjects={myProjects}
+          sharedProjects={sharedProjects}
+          onCreateProject={actions.openCreate}
+          onRenameProject={actions.openRename}
+          onDeleteProject={actions.openDelete}
         />
         {children}
       </div>
 
       <CreateProjectDialog
-        open={dialogs.activeDialog === "create"}
-        onOpenChange={(open) => { if (!open) dialogs.close(); }}
-        projectName={dialogs.projectName}
-        onProjectNameChange={dialogs.setProjectName}
-        slug={dialogs.slug}
-        isLoading={dialogs.isLoading}
-        onSubmit={dialogs.handleCreate}
+        open={actions.activeDialog === "create"}
+        onOpenChange={(open) => { if (!open) actions.close(); }}
+        projectName={actions.projectName}
+        onProjectNameChange={actions.setProjectName}
+        roomId={actions.roomId}
+        isLoading={actions.isLoading}
+        onSubmit={actions.handleCreate}
       />
 
       <RenameProjectDialog
-        open={dialogs.activeDialog === "rename"}
-        onOpenChange={(open) => { if (!open) dialogs.close(); }}
-        projectName={dialogs.projectName}
-        onProjectNameChange={dialogs.setProjectName}
-        targetProject={dialogs.targetProject}
-        isLoading={dialogs.isLoading}
-        onSubmit={dialogs.handleRename}
+        open={actions.activeDialog === "rename"}
+        onOpenChange={(open) => { if (!open) actions.close(); }}
+        projectName={actions.projectName}
+        onProjectNameChange={actions.setProjectName}
+        targetProject={actions.targetProject}
+        isLoading={actions.isLoading}
+        onSubmit={actions.handleRename}
       />
 
       <DeleteProjectDialog
-        open={dialogs.activeDialog === "delete"}
-        onOpenChange={(open) => { if (!open) dialogs.close(); }}
-        targetProject={dialogs.targetProject}
-        isLoading={dialogs.isLoading}
-        onSubmit={dialogs.handleDelete}
+        open={actions.activeDialog === "delete"}
+        onOpenChange={(open) => { if (!open) actions.close(); }}
+        targetProject={actions.targetProject}
+        isLoading={actions.isLoading}
+        onSubmit={actions.handleDelete}
       />
     </ProjectDialogContext.Provider>
   );

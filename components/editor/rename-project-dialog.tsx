@@ -1,14 +1,14 @@
 import { EditorDialog } from "./editor-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Project } from "@/lib/mock-projects";
+import type { ProjectRecord } from "@/lib/projects";
 
 interface RenameProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectName: string;
   onProjectNameChange: (name: string) => void;
-  targetProject: Project | null;
+  targetProject: ProjectRecord | null;
   isLoading: boolean;
   onSubmit: () => void;
 }

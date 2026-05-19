@@ -4,28 +4,31 @@ import { X, Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MOCK_SHARED_PROJECTS, type Project } from "@/lib/mock-projects";
+import type { ProjectRecord } from "@/lib/projects";
 
 interface ProjectSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  myProjects: Project[];
+  myProjects: ProjectRecord[];
+  sharedProjects: ProjectRecord[];
   onCreateProject: () => void;
-  onRenameProject: (project: Project) => void;
-  onDeleteProject: (project: Project) => void;
+  onRenameProject: (project: ProjectRecord) => void;
+  onDeleteProject: (project: ProjectRecord) => void;
+  activeProjectId?: string;
 }
 
 export function ProjectSidebar({
   isOpen,
   onClose,
   myProjects,
+  sharedProjects,
   onCreateProject,
   onRenameProject,
   onDeleteProject,
+  activeProjectId,
 }: ProjectSidebarProps) {
   return (
     <>
-      {/* Mobile backdrop scrim */}
       {isOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/50 sm:hidden"
@@ -70,6 +73,7 @@ export function ProjectSidebar({
                     <ProjectItem
                       key={project.id}
                       project={project}
+                      isActive={project.id === activeProjectId}
                       onRename={onRenameProject}
                       onDelete={onDeleteProject}
                     />
@@ -80,14 +84,14 @@ export function ProjectSidebar({
           </TabsContent>
 
           <TabsContent value="shared" className="flex flex-1 flex-col overflow-hidden min-h-0 mt-0 p-2">
-            {MOCK_SHARED_PROJECTS.length === 0 ? (
+            {sharedProjects.length === 0 ? (
               <div className="flex flex-1 items-center justify-center p-4">
                 <p className="text-sm text-copy-faint">No shared projects</p>
               </div>
             ) : (
               <ScrollArea className="flex-1">
                 <div className="flex flex-col gap-0.5 p-1">
-                  {MOCK_SHARED_PROJECTS.map((project) => (
+                  {sharedProjects.map((project) => (
                     <ProjectItem key={project.id} project={project} />
                   ))}
                 </div>
@@ -108,18 +112,17 @@ export function ProjectSidebar({
 }
 
 interface ProjectItemProps {
-  project: Project;
-  onRename?: (project: Project) => void;
-  onDelete?: (project: Project) => void;
+  project: ProjectRecord;
+  isActive?: boolean;
+  onRename?: (project: ProjectRecord) => void;
+  onDelete?: (project: ProjectRecord) => void;
 }
 
-function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
-  const showActions = project.owned && (onRename || onDelete);
-
+function ProjectItem({ project, isActive, onRename, onDelete }: ProjectItemProps) {
   return (
-    <div className="group flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-subtle">
-      <span className="text-sm text-copy-secondary truncate flex-1 min-w-0">{project.name}</span>
-      {showActions && (
+    <div className={`group flex items-center justify-between rounded-lg px-2 py-1.5 ${isActive ? "bg-subtle" : "hover:bg-subtle"}`}>
+      <span className={`truncate flex-1 min-w-0 text-sm ${isActive ? "text-copy-primary font-medium" : "text-copy-secondary"}`}>{project.name}</span>
+      {(onRename || onDelete) && (
         <div className="flex items-center gap-0.5 ml-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
           {onRename && (
             <Button

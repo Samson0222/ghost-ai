@@ -1,11 +1,11 @@
 import { EditorDialog } from "./editor-dialog";
 import { Button } from "@/components/ui/button";
-import type { Project } from "@/lib/mock-projects";
+import type { ProjectRecord } from "@/lib/projects";
 
 interface DeleteProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetProject: Project | null;
+  targetProject: ProjectRecord | null;
   isLoading: boolean;
   onSubmit: () => void;
 }
