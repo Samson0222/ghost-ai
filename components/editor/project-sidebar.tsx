@@ -120,7 +120,7 @@ function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
     <div className="group flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-subtle">
       <span className="text-sm text-copy-secondary truncate flex-1 min-w-0">{project.name}</span>
       {showActions && (
-        <div className="hidden group-hover:flex items-center gap-0.5 ml-1 shrink-0">
+        <div className="flex items-center gap-0.5 ml-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
           {onRename && (
             <Button
               variant="ghost"

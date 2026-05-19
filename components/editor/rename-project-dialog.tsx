@@ -44,7 +44,10 @@ export function RenameProjectDialog({
         value={projectName}
         onChange={(e) => onProjectNameChange(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && projectName.trim()) onSubmit();
+          if (e.key === "Enter" && projectName.trim() && !isLoading) {
+            e.preventDefault();
+            onSubmit();
+          }
         }}
         autoFocus
       />
