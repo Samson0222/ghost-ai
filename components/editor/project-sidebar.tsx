@@ -14,6 +14,7 @@ interface ProjectSidebarProps {
   onCreateProject: () => void;
   onRenameProject: (project: ProjectRecord) => void;
   onDeleteProject: (project: ProjectRecord) => void;
+  activeProjectId?: string;
 }
 
 export function ProjectSidebar({
@@ -24,6 +25,7 @@ export function ProjectSidebar({
   onCreateProject,
   onRenameProject,
   onDeleteProject,
+  activeProjectId,
 }: ProjectSidebarProps) {
   return (
     <>
@@ -71,6 +73,7 @@ export function ProjectSidebar({
                     <ProjectItem
                       key={project.id}
                       project={project}
+                      isActive={project.id === activeProjectId}
                       onRename={onRenameProject}
                       onDelete={onDeleteProject}
                     />
@@ -110,14 +113,15 @@ export function ProjectSidebar({
 
 interface ProjectItemProps {
   project: ProjectRecord;
+  isActive?: boolean;
   onRename?: (project: ProjectRecord) => void;
   onDelete?: (project: ProjectRecord) => void;
 }
 
-function ProjectItem({ project, onRename, onDelete }: ProjectItemProps) {
+function ProjectItem({ project, isActive, onRename, onDelete }: ProjectItemProps) {
   return (
-    <div className="group flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-subtle">
-      <span className="text-sm text-copy-secondary truncate flex-1 min-w-0">{project.name}</span>
+    <div className={`group flex items-center justify-between rounded-lg px-2 py-1.5 ${isActive ? "bg-subtle" : "hover:bg-subtle"}`}>
+      <span className={`truncate flex-1 min-w-0 text-sm ${isActive ? "text-copy-primary font-medium" : "text-copy-secondary"}`}>{project.name}</span>
       {(onRename || onDelete) && (
         <div className="flex items-center gap-0.5 ml-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
           {onRename && (

@@ -13,6 +13,7 @@ interface EditorDialogProps extends Pick<ComponentProps<typeof Dialog>, "open" |
   description?: string;
   children?: ReactNode;
   footer?: ReactNode;
+  className?: string;
 }
 
 /**
@@ -33,10 +34,11 @@ export function EditorDialog({
   description,
   children,
   footer,
+  className,
 }: EditorDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false} className="bg-elevated border-border rounded-3xl">
+      <DialogContent showCloseButton={false} className={`bg-elevated border-border rounded-3xl ${className ?? ""}`}>
         <DialogHeader>
           <DialogTitle className="text-copy-primary">{title}</DialogTitle>
           {description && (
