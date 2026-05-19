@@ -18,7 +18,7 @@ export async function GET(
 
   if (project.ownerId !== userId) {
     const user = await currentUser();
-    const email = user?.primaryEmailAddress?.emailAddress;
+    const email = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
     if (!email) return Response.json({ error: "Forbidden" }, { status: 403 });
     const collab = await prisma.projectCollaborator.findUnique({
       where: { projectId_email: { projectId, email } },
@@ -94,14 +94,15 @@ export async function POST(
     return Response.json({ error: "You are already the project owner" }, { status: 400 });
   }
 
-  const existing = await prisma.projectCollaborator.findUnique({
-    where: { projectId_email: { projectId, email } },
-  });
-  if (existing) return Response.json({ error: "Already a collaborator" }, { status: 409 });
-
-  const collaborator = await prisma.projectCollaborator.create({
-    data: { projectId, email },
-  });
-
-  return Response.json(collaborator, { status: 201 });
+  try {
+    const collaborator = await prisma.projectCollaborator.create({
+      data: { projectId, email },
+    });
+    return Response.json(collaborator, { status: 201 });
+  } catch (err: unknown) {
+    if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "P2002") {
+      return Response.json({ error: "Already a collaborator" }, { status: 409 });
+    }
+    throw err;
+  }
 }

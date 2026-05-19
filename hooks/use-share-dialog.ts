@@ -64,9 +64,12 @@ export function useShareDialog(projectId: string) {
   async function handleRemove(collaboratorId: string) {
     setCollaborators((prev) => prev.filter((c) => c.id !== collaboratorId));
     try {
-      await fetch(`/api/projects/${projectId}/collaborators/${collaboratorId}`, {
+      const res = await fetch(`/api/projects/${projectId}/collaborators/${collaboratorId}`, {
         method: "DELETE",
       });
+      if (!res.ok) {
+        await loadCollaborators();
+      }
     } catch {
       await loadCollaborators();
     }

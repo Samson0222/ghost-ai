@@ -11,7 +11,7 @@
 !.yarn/versions
 
 # internal / review artifacts
-context/feature-specs/current-issue.md
+# context/feature-specs/current-issue.md
 
 # testing
 /coverage

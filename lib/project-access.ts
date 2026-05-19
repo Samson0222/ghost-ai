@@ -35,7 +35,7 @@ export async function getProjectWithAccess(projectId: string): Promise<ProjectWi
   }
 
   const user = await currentUser();
-  const email = user?.primaryEmailAddress?.emailAddress;
+  const email = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
   if (!email) return null;
 
   const collaborator = await prisma.projectCollaborator.findUnique({

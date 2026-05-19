@@ -55,13 +55,17 @@ function ProjectLinkInput({ projectId, open }: { projectId: string; open: boolea
 }
 
 function getInitials(displayName: string | null, email: string): string {
-  if (displayName) {
-    const parts = displayName.trim().split(/\s+/);
-    return parts.length >= 2
-      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : parts[0][0].toUpperCase();
+  const normalizedName = displayName?.trim();
+  if (normalizedName) {
+    const parts = normalizedName.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    if (parts.length === 1) {
+      return parts[0].charAt(0).toUpperCase();
+    }
   }
-  return email[0].toUpperCase();
+  return email.trim().charAt(0).toUpperCase() || "?";
 }
 
 export function ShareDialog({
@@ -182,7 +186,7 @@ export function ShareDialog({
                 onChange={(e) => onInviteEmailChange(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.nativeEvent.isComposing) return;
-                  if (e.key === "Enter" && !isInviting) {
+                  if (e.key === "Enter" && !isInviting && inviteEmail.trim()) {
                     e.preventDefault();
                     onInvite();
                   }
