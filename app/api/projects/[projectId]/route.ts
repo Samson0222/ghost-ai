@@ -34,7 +34,17 @@ export async function PATCH(
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const updated = await prisma.project.findUnique({ where: { id: projectId } });
+  const updated = await prisma.project.findFirst({
+    where: { id: projectId, ownerId: userId },
+  });
+  if (!updated) {
+    const exists = await prisma.project.findUnique({
+      where: { id: projectId },
+      select: { id: true },
+    });
+    if (!exists) return Response.json({ error: "Not found" }, { status: 404 });
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
   return Response.json(updated);
 }
 
