@@ -4,11 +4,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Feature 04: Project Dialogs — in progress
+- Feature 05: Prisma — complete
 
 ## Current Goal
 
-- Build editor home screen, project create/rename/delete dialogs, and sidebar actions (mock data only).
+- Continue with next feature spec.
 
 ## Completed
 
@@ -16,14 +16,16 @@ Update this file whenever the current phase, active feature, or implementation s
 - **Design system** — shadcn/ui initialized, all 7 UI primitive components added (Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea), lucide-react installed, `lib/utils.ts` with `cn()` in place, `globals.css` rewritten as dark-only with full design system token set.
 - **Editor chrome** — `EditorNavbar` (fixed top bar, PanelLeftOpen/Close toggle), `ProjectSidebar` (fixed floating overlay, slide-in from left, My Projects / Shared tabs, New Project button), `EditorDialog` (reusable dialog pattern with title/description/footer slots). Components wired in `app/page.tsx`.
 - **Authentication** — Clerk wired in: `ClerkProvider` in root layout with `dark` theme from `@clerk/ui/themes` and CSS variable overrides; `proxy.ts` at project root using `clerkMiddleware` and `createRouteMatcher` to protect all non-auth routes; sign-in and sign-up pages at `/sign-in` and `/sign-up` with two-panel layout (logo + feature list left, Clerk form right; form-only on small screens); `/` redirects to `/editor`; `UserButton` in editor navbar right section. Editor moved to `app/(editor)/editor/page.tsx`; auth pages isolated in `app/(auth)/`.
+- **Project dialogs (Feature 04)** — editor home screen with project grid, create/rename/delete dialogs, sidebar project actions with mobile backdrop. Mock data only.
+- **Prisma (Feature 05)** — `prisma/models/project.prisma` with `Project` and `ProjectCollaborator` models; `lib/prisma.ts` cached singleton branching on `prisma+postgres://` (Accelerate) vs direct `@prisma/adapter-pg`; migration `20260519061317_init` applied; client generated to `app/generated/prisma`.
 
 ## In Progress
 
-- Feature 04: Project Dialogs — editor home screen, create/rename/delete dialogs, sidebar project actions with mobile backdrop.
+- None.
 
 ## Next Up
 
-- Continue with next feature spec after Feature 04 ships.
+- Continue with next feature spec after Feature 05.
 
 ## Open Questions
 
@@ -44,3 +46,4 @@ Update this file whenever the current phase, active feature, or implementation s
 - Design system Tailwind utilities: `bg-base`, `bg-surface`, `bg-elevated`, `bg-subtle`, `text-copy-primary`, `text-copy-secondary`, `text-copy-muted`, `text-copy-faint`, `bg-brand`, `text-brand`, `bg-ai`, `text-ai-text`, `bg-success`/`warning`/`error`, `border-border-subtle`.
 - Clerk v7 (`@clerk/nextjs@7.3.5`) — `clerkMiddleware` exported from `@clerk/nextjs/server`; `ClerkProvider`, `SignIn`, `SignUp`, `UserButton` from `@clerk/nextjs`. `dark` theme from `@clerk/ui/themes`.
 - In Next.js 16, `middleware.ts` is renamed to `proxy.ts` — same API, new filename convention.
+- Prisma 7.8.0 — `prisma.config.ts` drives schema dir (`prisma/`), migrations path, and datasource URL (overrides schema file). Schema dir is recursively scanned for `.prisma` files. Client output at `app/generated/prisma/`; import via `@/app/generated/prisma/client`. `PrismaClient` in v7 requires either `adapter` or `accelerateUrl` (mutually exclusive). Accelerate URLs start with `prisma+postgres://`; direct pg uses `new PrismaPg({ connectionString })`.
