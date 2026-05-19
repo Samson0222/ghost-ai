@@ -32,7 +32,7 @@ export function DeleteProjectDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={onSubmit} disabled={isLoading}>
+          <Button variant="destructive" onClick={onSubmit} disabled={isLoading || !targetProject}>
             Delete project
           </Button>
         </>

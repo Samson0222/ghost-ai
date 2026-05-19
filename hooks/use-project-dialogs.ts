@@ -42,7 +42,7 @@ export function useProjectDialogs() {
   }
 
   function handleCreate() {
-    if (!projectName.trim()) return;
+    if (!projectName.trim() || !slug) return;
     const newProject: Project = {
       id: crypto.randomUUID(),
       name: projectName.trim(),
@@ -54,7 +54,7 @@ export function useProjectDialogs() {
   }
 
   function handleRename() {
-    if (!projectName.trim() || !targetProject) return;
+    if (!projectName.trim() || !slug || !targetProject) return;
     setMyProjects((prev) =>
       prev.map((p) =>
         p.id === targetProject.id ? { ...p, name: projectName.trim(), slug } : p
