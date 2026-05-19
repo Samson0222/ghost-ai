@@ -57,6 +57,7 @@ export function useProjectActions() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: projectName.trim() || "Untitled Project" }),
       });
+      if (!res.ok) throw new Error("Failed to create project");
       const project = await res.json();
       close();
       router.push(`/editor/${project.id}`);
@@ -69,11 +70,12 @@ export function useProjectActions() {
     if (!targetProject || isLoading) return;
     setIsLoading(true);
     try {
-      await fetch(`/api/projects/${targetProject.id}`, {
+      const res = await fetch(`/api/projects/${targetProject.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: projectName.trim() }),
       });
+      if (!res.ok) throw new Error("Failed to rename project");
       close();
       router.refresh();
     } finally {
@@ -88,7 +90,8 @@ export function useProjectActions() {
       ? params.projectId[0]
       : (params?.projectId as string | undefined);
     try {
-      await fetch(`/api/projects/${targetProject.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/projects/${targetProject.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete project");
       close();
       if (activeProjectId === targetProject.id) {
         router.push("/editor");

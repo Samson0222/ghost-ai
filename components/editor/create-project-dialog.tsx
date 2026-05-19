@@ -44,6 +44,7 @@ export function CreateProjectDialog({
           value={projectName}
           onChange={(e) => onProjectNameChange(e.target.value)}
           onKeyDown={(e) => {
+            if (e.nativeEvent.isComposing) return;
             if (e.key === "Enter" && !isLoading) {
               e.preventDefault();
               onSubmit();
