@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import type { DragEvent } from "react";
 import {
   ReactFlow,
@@ -67,6 +68,30 @@ function CanvasContent() {
     });
 
   const { screenToFlowPosition } = useReactFlow<CanvasNode, CanvasEdge>();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  function insertShapeAtClientPoint(payload: ShapeDragPayload, point: { x: number; y: number }) {
+    const position = screenToFlowPosition(point);
+    const id = `${payload.shape}-${Date.now()}-${++nodeCounter}`;
+
+    const newNode: CanvasNode = {
+      id,
+      type: "canvasNode",
+      position: {
+        x: position.x - payload.width / 2,
+        y: position.y - payload.height / 2,
+      },
+      data: {
+        label: payload.label,
+        color: NODE_COLORS[0].fill,
+        shape: payload.shape,
+      },
+      width: payload.width,
+      height: payload.height,
+    };
+
+    onNodesChange([{ type: "add", item: newNode }]);
+  }
 
   function handleDragOver(event: DragEvent) {
     event.preventDefault();
@@ -91,30 +116,22 @@ function CanvasContent() {
       return;
     }
 
-    const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
-    const id = `${payload.shape}-${Date.now()}-${++nodeCounter}`;
+    insertShapeAtClientPoint(payload, { x: event.clientX, y: event.clientY });
+  }
 
-    const newNode: CanvasNode = {
-      id,
-      type: "canvasNode",
-      position: {
-        x: position.x - payload.width / 2,
-        y: position.y - payload.height / 2,
-      },
-      data: {
-        label: payload.label,
-        color: NODE_COLORS[0].fill,
-        shape: payload.shape,
-      },
-      width: payload.width,
-      height: payload.height,
-    };
+  function handleInsertShape(payload: ShapeDragPayload) {
+    const rect = wrapperRef.current?.getBoundingClientRect();
+    if (!rect) return;
 
-    onNodesChange([{ type: "add", item: newNode }]);
+    insertShapeAtClientPoint(payload, {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    });
   }
 
   return (
     <div
+      ref={wrapperRef}
       className="relative h-full w-full bg-base"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
@@ -140,7 +157,7 @@ function CanvasContent() {
         />
         <Cursors />
       </ReactFlow>
-      <ShapePanel />
+      <ShapePanel onInsert={handleInsertShape} />
       <ViewportIndicator />
     </div>
   );

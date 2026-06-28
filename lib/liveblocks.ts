@@ -26,11 +26,19 @@ declare global {
   var liveblocksClient: Liveblocks | undefined;
 }
 
+let liveblocksClient: Liveblocks | undefined;
+
 export function getLiveblocks(): Liveblocks {
+  if (liveblocksClient) return liveblocksClient;
   if (globalThis.liveblocksClient) return globalThis.liveblocksClient;
-  const client = new Liveblocks({ secret: process.env.LIVEBLOCKS_SECRET_KEY! });
-  if (process.env.NODE_ENV !== "production") {
-    globalThis.liveblocksClient = client;
+
+  const secret = process.env.LIVEBLOCKS_SECRET_KEY;
+  if (!secret) {
+    throw new Error("LIVEBLOCKS_SECRET_KEY is not configured");
   }
+
+  const client = new Liveblocks({ secret });
+  liveblocksClient = client;
+  globalThis.liveblocksClient = client;
   return client;
 }

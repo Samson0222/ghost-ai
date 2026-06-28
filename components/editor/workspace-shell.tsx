@@ -77,17 +77,16 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
           activeProjectId={project.id}
         />
 
-        <div className="flex flex-1 overflow-hidden pt-12">
-          <main className="flex flex-1 overflow-hidden bg-base">
+        <div className={`flex flex-1 overflow-hidden pt-12 transition-[padding] duration-200 ${isSidebarOpen ? "sm:pl-72" : ""}`}>
+          <main className="flex min-w-0 flex-1 overflow-hidden bg-base">
             <CanvasRoomWrapper roomId={project.id} />
           </main>
+          {isAIPanelOpen && (
+            <aside className="flex w-72 shrink-0 items-center justify-center border-l border-border-subtle bg-surface sm:w-80">
+              <p className="text-sm text-copy-faint">AI chat coming soon</p>
+            </aside>
+          )}
         </div>
-
-        {isAIPanelOpen && (
-          <aside className="fixed bottom-0 right-0 top-12 z-40 flex w-80 flex-none items-center justify-center border-l border-border-subtle bg-surface">
-            <p className="text-sm text-copy-faint">AI chat coming soon</p>
-          </aside>
-        )}
       </div>
 
       <CreateProjectDialog

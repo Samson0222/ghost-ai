@@ -62,7 +62,7 @@ export function CanvasRoomWrapper({ roomId }: CanvasRoomWrapperProps) {
         id={roomId}
         initialPresence={{ cursor: null, isThinking: false }}
       >
-        <CanvasErrorBoundary>
+        <CanvasErrorBoundary key={roomId}>
           <ClientSideSuspense
             fallback={
               <div className="flex h-full w-full items-center justify-center">

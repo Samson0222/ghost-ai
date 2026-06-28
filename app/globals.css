@@ -166,8 +166,9 @@
 .react-flow__node.selected,
 .react-flow__node:focus,
 .react-flow__node:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
+    outline: 2px solid var(--accent-primary) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--accent-primary-dim) !important;
 }
 .react-flow__panel {
     box-shadow: none;

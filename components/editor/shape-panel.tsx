@@ -29,14 +29,18 @@ export interface ShapeDragPayload {
 
 export const SHAPE_DRAG_TYPE = "application/ghost-shape";
 
-export function ShapePanel() {
+interface ShapePanelProps {
+  onInsert?: (payload: ShapeDragPayload) => void;
+}
+
+export function ShapePanel({ onInsert }: ShapePanelProps) {
   function handleDragStart(e: React.DragEvent, config: ShapeConfig) {
-    const payload: ShapeDragPayload = {
+    const payload = {
       shape: config.shape,
       label: config.label,
       width: config.width,
       height: config.height,
-    };
+    } satisfies ShapeDragPayload;
     const json = JSON.stringify(payload);
     e.dataTransfer.setData(SHAPE_DRAG_TYPE, json);
     e.dataTransfer.setData("application/x-ghost-shape", json);
@@ -54,7 +58,16 @@ export function ShapePanel() {
             key={config.shape}
             draggable
             onDragStart={(e) => handleDragStart(e, config)}
+            onClick={() =>
+              onInsert?.({
+                shape: config.shape,
+                label: config.label,
+                width: config.width,
+                height: config.height,
+              })
+            }
             title={config.label}
+            aria-label={`Add ${config.label}`}
             className="flex h-8 w-8 cursor-grab items-center justify-center rounded-xl text-copy-muted transition-colors hover:bg-elevated hover:text-copy-primary active:cursor-grabbing"
           >
             {/* pointer-events:none stops the SVG from being the drag target,
