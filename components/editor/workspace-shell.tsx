@@ -12,6 +12,7 @@ import { DeleteProjectDialog } from "./delete-project-dialog";
 import { ShareDialog } from "./share-dialog";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import { useShareDialog } from "@/hooks/use-share-dialog";
+import { CanvasRoomWrapper } from "./canvas-room-wrapper";
 import type { ProjectRecord } from "@/lib/projects";
 
 interface WorkspaceShellProps {
@@ -22,7 +23,7 @@ interface WorkspaceShellProps {
 }
 
 export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }: WorkspaceShellProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
   const actions = useProjectActions();
   const share = useShareDialog(project.id);
@@ -77,15 +78,16 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
         />
 
         <div className="flex flex-1 overflow-hidden pt-12">
-          <main className="flex flex-1 items-center justify-center bg-base">
-            <p className="text-sm text-copy-faint">Canvas coming soon</p>
+          <main className="flex flex-1 overflow-hidden bg-base">
+            <CanvasRoomWrapper roomId={project.id} />
           </main>
-          {isAIPanelOpen && (
-            <aside className="flex w-80 flex-none items-center justify-center border-l border-border bg-surface">
-              <p className="text-sm text-copy-faint">AI chat coming soon</p>
-            </aside>
-          )}
         </div>
+
+        {isAIPanelOpen && (
+          <aside className="fixed bottom-0 right-0 top-12 z-40 flex w-80 flex-none items-center justify-center border-l border-border-subtle bg-surface">
+            <p className="text-sm text-copy-faint">AI chat coming soon</p>
+          </aside>
+        )}
       </div>
 
       <CreateProjectDialog

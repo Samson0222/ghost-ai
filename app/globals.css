@@ -144,3 +144,47 @@
         transition: background-color 9999s ease-in-out 0s !important;
     }
 }
+
+/* React Flow canvas overrides — infinite canvas feel, no borders/shadows/card effect */
+.react-flow {
+    --xy-background-color-default: transparent;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+}
+.react-flow__renderer,
+.react-flow__container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+.react-flow__node {
+    box-shadow: none !important;
+}
+.react-flow__node.selected,
+.react-flow__node:focus,
+.react-flow__node:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.react-flow__panel {
+    box-shadow: none;
+}
+.react-flow__pane {
+    cursor: default;
+}
+/* MiniMap dark theme */
+.react-flow__minimap {
+    border-radius: 8px;
+    overflow: hidden;
+    background: #111114;
+    border: 1px solid #3a3a42;
+}
+.react-flow__minimap-svg {
+    background: #111114;
+}
+.react-flow__minimap-mask {
+    fill: rgba(0, 0, 0, 0.6);
+}
