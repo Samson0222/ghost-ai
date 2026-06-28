@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { X, Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -74,6 +75,7 @@ export function ProjectSidebar({
                       key={project.id}
                       project={project}
                       isActive={project.id === activeProjectId}
+                      onOpen={onClose}
                       onRename={onRenameProject}
                       onDelete={onDeleteProject}
                     />
@@ -92,7 +94,12 @@ export function ProjectSidebar({
               <ScrollArea className="flex-1">
                 <div className="flex flex-col gap-0.5 p-1">
                   {sharedProjects.map((project) => (
-                    <ProjectItem key={project.id} project={project} />
+                    <ProjectItem
+                      key={project.id}
+                      project={project}
+                      isActive={project.id === activeProjectId}
+                      onOpen={onClose}
+                    />
                   ))}
                 </div>
               </ScrollArea>
@@ -114,16 +121,24 @@ export function ProjectSidebar({
 interface ProjectItemProps {
   project: ProjectRecord;
   isActive?: boolean;
+  onOpen?: () => void;
   onRename?: (project: ProjectRecord) => void;
   onDelete?: (project: ProjectRecord) => void;
 }
 
-function ProjectItem({ project, isActive, onRename, onDelete }: ProjectItemProps) {
+function ProjectItem({ project, isActive, onOpen, onRename, onDelete }: ProjectItemProps) {
   return (
-    <div className={`group flex items-center justify-between rounded-lg px-2 py-1.5 ${isActive ? "bg-subtle" : "hover:bg-subtle"}`}>
-      <span className={`truncate flex-1 min-w-0 text-sm ${isActive ? "text-copy-primary font-medium" : "text-copy-secondary"}`}>{project.name}</span>
+    <div className={`group flex items-center justify-between rounded-lg ${isActive ? "bg-subtle" : "hover:bg-subtle"}`}>
+      <Link
+        href={`/editor/${project.id}`}
+        onClick={onOpen}
+        aria-current={isActive ? "page" : undefined}
+        className={`min-w-0 flex-1 truncate px-2 py-1.5 text-sm ${isActive ? "font-medium text-copy-primary" : "text-copy-secondary"}`}
+      >
+        {project.name}
+      </Link>
       {(onRename || onDelete) && (
-        <div className="flex items-center gap-0.5 ml-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+        <div className="mr-1 flex shrink-0 items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
           {onRename && (
             <Button
               variant="ghost"

@@ -17,7 +17,7 @@ interface EditorShellProps {
 }
 
 export function EditorShell({ children, myProjects, sharedProjects }: EditorShellProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const actions = useProjectActions();
 
   return (
