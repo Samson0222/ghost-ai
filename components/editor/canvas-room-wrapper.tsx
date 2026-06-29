@@ -3,6 +3,7 @@
 import React from "react";
 import { LiveblocksProvider, RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 import { Canvas } from "./canvas";
+import type { LoadTemplateFn } from "./canvas";
 
 class CanvasErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -33,6 +34,7 @@ class CanvasErrorBoundary extends React.Component<
 
 interface CanvasRoomWrapperProps {
   roomId: string;
+  loadTemplateRef?: React.MutableRefObject<LoadTemplateFn | null>;
 }
 
 async function authorizeLiveblocksRoom(room?: string) {
@@ -55,7 +57,7 @@ async function authorizeLiveblocksRoom(room?: string) {
   return await response.json();
 }
 
-export function CanvasRoomWrapper({ roomId }: CanvasRoomWrapperProps) {
+export function CanvasRoomWrapper({ roomId, loadTemplateRef }: CanvasRoomWrapperProps) {
   return (
     <LiveblocksProvider authEndpoint={authorizeLiveblocksRoom}>
       <RoomProvider
@@ -70,7 +72,7 @@ export function CanvasRoomWrapper({ roomId }: CanvasRoomWrapperProps) {
               </div>
             }
           >
-            <Canvas />
+            <Canvas loadTemplateRef={loadTemplateRef} />
           </ClientSideSuspense>
         </CanvasErrorBoundary>
       </RoomProvider>

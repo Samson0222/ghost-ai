@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { PanelLeftClose, PanelLeftOpen, Share2, BrainCircuit } from "lucide-react";
+import { useState, useRef } from "react";
+import { PanelLeftClose, PanelLeftOpen, Share2, BrainCircuit, LayoutTemplate } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ProjectSidebar } from "./project-sidebar";
@@ -10,9 +10,11 @@ import { CreateProjectDialog } from "./create-project-dialog";
 import { RenameProjectDialog } from "./rename-project-dialog";
 import { DeleteProjectDialog } from "./delete-project-dialog";
 import { ShareDialog } from "./share-dialog";
+import { StarterTemplatesModal } from "./starter-templates-modal";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import { useShareDialog } from "@/hooks/use-share-dialog";
 import { CanvasRoomWrapper } from "./canvas-room-wrapper";
+import type { LoadTemplateFn } from "./canvas";
 import type { ProjectRecord } from "@/lib/projects";
 
 interface WorkspaceShellProps {
@@ -25,6 +27,8 @@ interface WorkspaceShellProps {
 export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }: WorkspaceShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
+  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
+  const loadTemplateRef = useRef<LoadTemplateFn | null>(null);
   const actions = useProjectActions();
   const share = useShareDialog(project.id);
 
@@ -49,6 +53,15 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
             {project.name}
           </span>
           <div className="flex shrink-0 items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs"
+              onClick={() => setIsTemplatesOpen(true)}
+            >
+              <LayoutTemplate className="h-3.5 w-3.5" />
+              Templates
+            </Button>
             <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={share.open}>
               <Share2 className="h-3.5 w-3.5" />
               Share
@@ -79,7 +92,7 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
 
         <div className={`flex flex-1 overflow-hidden pt-12 transition-[padding] duration-200 ${isSidebarOpen ? "sm:pl-72" : ""}`}>
           <main className="flex min-w-0 flex-1 overflow-hidden bg-base">
-            <CanvasRoomWrapper roomId={project.id} />
+            <CanvasRoomWrapper roomId={project.id} loadTemplateRef={loadTemplateRef} />
           </main>
           {isAIPanelOpen && (
             <aside className="flex w-72 shrink-0 items-center justify-center border-l border-border-subtle bg-surface sm:w-80">
@@ -130,6 +143,11 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
         onRemove={share.handleRemove}
         copied={share.copied}
         onCopyLink={share.handleCopyLink}
+      />
+      <StarterTemplatesModal
+        open={isTemplatesOpen}
+        onOpenChange={setIsTemplatesOpen}
+        onImport={(template) => loadTemplateRef.current?.(template)}
       />
     </ProjectDialogContext.Provider>
   );
