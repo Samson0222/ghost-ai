@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"console.log\\(require\\('@liveblocks/react-flow/package.json'\\).version\\)\")",
+      "Bash(node -e \"const a = require\\('@liveblocks/react'\\); const b = require\\('@liveblocks/react/suspense'\\); console.log\\('same RoomProvider:', a.RoomProvider === b.RoomProvider\\); console.log\\('same useMutation:', a.useMutation === b.useMutation\\)\")"
+    ]
+  }
+}
