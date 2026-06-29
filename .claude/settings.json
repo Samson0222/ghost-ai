@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const p = require\\('./node_modules/@liveblocks/core/package.json'\\); console.log\\(p.version\\); console.log\\(Object.keys\\(p.exports || {}\\).slice\\(0,30\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const fs = require('fs'); console.log(fs.readFileSync('./node_modules/@liveblocks/client/dist/index.d.ts', 'utf8').substring(0, 2000))\")",
+      "Bash(node -e \"const fs = require\\('fs'\\); const data = fs.readFileSync\\('node_modules/@liveblocks/client/dist/index.d.ts', 'utf8'\\); const lines = data.split\\('\\\\n'\\).filter\\(l => l.includes\\('Session'\\) || l.includes\\('authorize'\\) || l.includes\\('token'\\) || l.includes\\('secret'\\)\\); console.log\\(lines.slice\\(0,30\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const fs = require\\('fs'\\); const data = fs.readFileSync\\('node_modules/@liveblocks/core/dist/index.d.ts', 'utf8'\\); const lines = data.split\\('\\\\n'\\).filter\\(l => /prepareSession|identifyUser|LiveblocksNode|allowRoom|authorize/.test\\(l\\)\\); console.log\\(lines.slice\\(0,30\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"try{require\\('@liveblocks/node'\\); console.log\\('found'\\)}catch\\(e\\){console.log\\('not found:', e.message\\)}\")",
+      "Bash(node -e \"const fs = require\\('fs'\\); const data = fs.readFileSync\\('node_modules/@liveblocks/react/dist/index.d.ts', 'utf8'\\); const lines = data.split\\('\\\\n'\\).filter\\(l => /node|server|Session|auth|token/.test\\(l\\)\\); console.log\\(lines.slice\\(0,20\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const fs = require\\('fs'\\); const data = fs.readFileSync\\('node_modules/@liveblocks/client/dist/index.d.ts', 'utf8'\\); console.log\\(data.substring\\(0, 3000\\)\\)\")",
+      "Bash(node -e \"const fs = require\\('fs'\\); const data = fs.readFileSync\\('node_modules/@liveblocks/react-flow/dist/index.d.ts', 'utf8'\\); console.log\\(data.substring\\(0, 4000\\)\\)\")",
+      "Bash(node -e \"try{require\\('react-error-boundary'\\); console.log\\('installed'\\)}catch\\(e\\){console.log\\('not found'\\)}\")",
+      "Bash(node -e \"const p = require\\('./node_modules/@liveblocks/react-flow/package.json'\\); console.log\\(p.version\\); console.log\\(JSON.stringify\\(p.peerDependencies || {}\\)\\)\")",
+      "Bash(node -e \"const fs = require\\('fs'\\); const data = fs.readFileSync\\('node_modules/@liveblocks/react-flow/dist/index.d.ts', 'utf8'\\); console.log\\(data.substring\\(4000, 8000\\)\\)\")",
+      "Bash(node -e \"const fs = require\\('fs'\\); const data = fs.readFileSync\\('node_modules/@liveblocks/react-flow/dist/index.d.ts', 'utf8'\\); console.log\\(data.substring\\(8000, 11000\\)\\)\")",
+      "Bash(xargs -I{} basename {} .mjs)",
+      "Bash(grep -E \"^pill$|^square$|^diamond$|^circle$|^database$|^hexagon$\")"
+    ]
+  }
+}

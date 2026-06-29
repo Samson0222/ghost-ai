@@ -166,9 +166,8 @@
 .react-flow__node.selected,
 .react-flow__node:focus,
 .react-flow__node:focus-visible {
-    outline: 2px solid var(--accent-primary) !important;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px var(--accent-primary-dim) !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 .react-flow__panel {
     box-shadow: none;
@@ -176,6 +175,23 @@
 .react-flow__pane {
     cursor: default;
 }
+/* Connection handles — small white dots, hidden by default, fade in on hover/select */
+.react-flow__handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: #ffffff !important;
+  border: 2px solid #111114 !important;
+  border-radius: 50% !important;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.react-flow__node:hover .react-flow__handle,
+.react-flow__node.selected .react-flow__handle,
+.react-flow__handle.connecting,
+.react-flow__handle.valid {
+  opacity: 1;
+}
+
 /* MiniMap dark theme */
 .react-flow__minimap {
     border-radius: 8px;
