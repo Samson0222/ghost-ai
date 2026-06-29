@@ -54,13 +54,13 @@ file.
   a human inside your Liveblocks application.
 - `ai-chats-with-tools-knowledge-components`: Set up and troubleshoot chats with
   RAG, knowledge, custom components, tool calling, custom models. Different to
-  AI as a collaborator, as it is NOT workflow based.
+  AI as a collaborator, as it is NOT workflow-based.
 - `auth-endpoint-callback`: Use a callback function to authenticate users,
   instead of passing a string to `authEndpoint`. Useful for passing custom
   headers to your back end, and for preventing automatic reconnection when the
   token is invalid.
 - `authenticating-with-access-tokens`: Alternative method for authenticating
-  users with their ID and info, best for very simple permissions.
+  users with their ID and info, best for straightforward permissions.
 - `authenticating-with-id-tokens`: Recommended method for authenticating users
   with their ID and info, best for complex permissions.
 - `avoid-hitting-user-limit-in-rooms`: How to avoid rooms filling up with users.
@@ -151,14 +151,14 @@ file.
 
 Some files link to markdown files in the Liveblocks docs, for example:
 
-```
+```text
 https://liveblocks.io/docs/concepts.md
 ```
 
 When linking users to these pages, remove `.md` from the link, so they can view
 the full content:
 
-```
+```text
 https://liveblocks.io/docs/concepts
 ```
 

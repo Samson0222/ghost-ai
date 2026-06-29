@@ -62,9 +62,9 @@ function Link({ href, children }: CommentBodyLinkProps) {
 Merge with your design system components. `asChild` is helpful.
 
 ```tsx
-function DesignSystemLink({ url, children }) {
+function DesignSystemLink({ href, children }) {
   return (
-    <a href={url} target="_blank" class="underline font-medium">
+    <a href={href} target="_blank" className="underline font-medium">
       {children}
     </a>
   );

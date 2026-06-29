@@ -27,5 +27,5 @@ function App() {
 }
 ```
 
-Note that rooms with lots of high frequency updates by multiple users may become
+Note that rooms with lots of high-frequency updates by multiple users may become
 laggy with a low throttle value.

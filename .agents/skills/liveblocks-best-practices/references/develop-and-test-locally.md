@@ -10,7 +10,7 @@ built on our open-source `@liveblocks/server` package.
 
 It may not support all Liveblocks features, but fully supports Storage, Yjs,
 text editors. Check the table for
-[up to date info](https://liveblocks.io/docs/tools/dev-server.md).
+[up-to-date info](https://liveblocks.io/docs/tools/dev-server.md).
 
 ## Set up
 
@@ -21,6 +21,6 @@ text editors. Check the table for
    `secret`/`publicApiKey` to the correct values).
 4. Done.
 
-- [Up to date info](https://liveblocks.io/docs/tools/dev-server.md).
+- [Up-to-date info](https://liveblocks.io/docs/tools/dev-server.md).
 - [Set up CI testing](https://liveblocks.io/docs/guides/how-to-set-up-continuous-integration-ci-testing.md).
-- [Set up E2E testing](vhttps://liveblocks.io/docs/guides/how-to-set-up-end-to-end-e2e-testing-with-playwright.md).
+- [Set up E2E testing](https://liveblocks.io/docs/guides/how-to-set-up-end-to-end-e2e-testing-with-playwright.md).

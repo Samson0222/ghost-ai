@@ -77,7 +77,7 @@ inboxNotifications.map((inboxNotification) => (
     inboxNotification={inboxNotification}
     kinds={{
       $alert: (props) => {
-        const { title, message } = props.inboxNotification.activities[0].data;
+        const { title, message } = props.inboxNotification.activities[0]?.data ?? {};
 
         return (
           <InboxNotification.Custom

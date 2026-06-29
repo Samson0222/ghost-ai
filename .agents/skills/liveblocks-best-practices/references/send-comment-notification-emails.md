@@ -16,7 +16,7 @@ import { Liveblocks } from "@liveblocks/node";
 import { prepareThreadNotificationEmailAsReact } from "@liveblocks/emails";
 
 const liveblocks = new Liveblocks({
-  secret: "sk_prod_xxxxxxxxxxxxxxxxxxxxxxxx",
+  secret: process.env.LIVEBLOCKS_SECRET_KEY!,
 });
 
 const webhookHandler = new WebhookHandler(

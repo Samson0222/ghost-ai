@@ -5,14 +5,14 @@ title: "Rendering error components"
 # Rendering error components
 
 It's recommended to structure your app using the suspense version of Liveblocks
-hooks, alongside `ErrorBoundary` and its `fallback` property used as a an error
+hooks, alongside `ErrorBoundary` and its `fallback` property used as an error
 component. Make sure it's installed:
 
-```
+```bash
 npm install react-error-boundary
 ```
 
-Instead of wrapping your entire Liveblocks application inside single
+Instead of wrapping your entire Liveblocks application inside a single
 `ClientSideSuspense` and `ErrorBoundary` components, you can use multiple of
 these components in different parts of your application, and each will work as a
 loading fallbacks and error fallbacks for any components further down your tree.
@@ -135,5 +135,5 @@ Note that regular hooks are exported from `"@liveblocks/react"`.
 
 ## Summary
 
-It's recommend to use the suspense versions of hooks and `ErrorBoundary` to
+It's recommended to use the suspense versions of hooks and `ErrorBoundary` to
 create loading states.

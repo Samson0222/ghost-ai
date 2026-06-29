@@ -20,7 +20,7 @@ function isEditingField(target: EventTarget | null): boolean {
 export function useKeyboardShortcuts({ instance, onUndo, onRedo }: Options) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (isEditingField(e.target)) return;
+      if (e.defaultPrevented || isEditingField(e.target)) return;
 
       const ctrl = e.ctrlKey || e.metaKey;
 

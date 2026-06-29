@@ -7,7 +7,7 @@ title: "Avoid hitting user limit in rooms"
 Only a certain amount of users can join your room, and this limit is set by your
 plan, for example 20 or 50. One way to avoid hitting this limit is to set
 [`backgroundKeepAliveTimeout`](https://liveblocks.io/docs/api-reference/liveblocks-react#LiveblocksProviderBackgroundKeepAliveTimeout)
-on `LiveblocksProvider`. This disconnects users that have not opened their
+on `LiveblocksProvider`. This disconnects users who have not opened their
 Liveblocks tab after a certain amount of time, helping you avoid hitting the
 limit.
 

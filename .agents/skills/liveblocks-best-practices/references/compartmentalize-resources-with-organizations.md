@@ -49,7 +49,7 @@ authentication.
 ### ID tokens
 
 When using ID tokens, you can set the `organizationId` when using
-`identifyUser`. Tokens generated for a specific organization, will only allow
+`identifyUser`. Tokens generated for a specific organization will only allow
 access to resources inside this organization, even if the user has access to
 rooms in other organizations.
 
@@ -66,7 +66,7 @@ console.log(body);
 ### Access tokens
 
 When using access tokens, you can set the organizationId when you prepare a
-session. Tokens generated for a specific organization, will only allow access to
+session. Tokens generated for a specific organization will only allow access to
 resources inside this organization, even if the token has permissions to rooms
 in other organizations.
 

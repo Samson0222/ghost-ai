@@ -213,13 +213,13 @@ export function StarterTemplatesModal({
             Choose a starter template to pre-populate your canvas. Any existing nodes will be
             replaced —{" "}
             <kbd className="rounded border border-border-subtle bg-elevated px-1 py-0.5 font-mono text-xs text-copy-secondary">
-              Ctrl+Z
+              Ctrl/Cmd+Z
             </kbd>{" "}
             to undo.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {CANVAS_TEMPLATES.map((template) => (
             <div
               key={template.id}

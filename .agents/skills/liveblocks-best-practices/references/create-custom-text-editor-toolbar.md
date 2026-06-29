@@ -4,7 +4,7 @@ title: "Create custom text editor toolbar"
 
 # Create custom text editor toolbar
 
-Tiptap and Lexical allow you to create custom toolbars, with sty;es that match
+Tiptap and Lexical allow you to create custom toolbars, with styles that match
 the existing toolbar and Liveblocks components. This works the same way for
 `Toolbar` and `FloatingToolbar`. `FloatingToolbar` floats below the current text
 selection.
@@ -22,7 +22,7 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
       <Toolbar.Button
         name="Help"
         icon={<Icon.QuestionMark />}
-        shortcut="CMD-H"
+        shortcut="Cmd+H"
         onClick={() => console.log("help")}
       />
       <Toolbar.Toggle
@@ -49,7 +49,7 @@ import { Icon } from "@liveblocks/react-ui";
 <Toolbar.Toggle name="Question" onClick={/* ... */} />
 
 // Tooltip says "Question [⌘+Q]"
-<Toolbar.Button name="Question" shortcut="CMD+Q" onClick={/* ... */} />
+<Toolbar.Button name="Question" shortcut="Cmd+Q" onClick={/* ... */} />
 
 // Custom icon, replaces the name in the button
 <Toolbar.Button name="Question" icon={<div>?</div>} onClick={/* ... */} />
@@ -89,7 +89,7 @@ import { Icon } from "@liveblocks/react-ui";
 // Tooltip says "Highlight [⌘+H]"
 <Toolbar.Toggle
   name="Highlight"
-  shortcut="CMD+H"
+  shortcut="Cmd+H"
   active={/* ... */}
   onClick={/* ... */}
 />
@@ -202,15 +202,15 @@ import { Toolbar } from "@liveblocks/react-tiptap";
 />;
 ```
 
-Remember to export from `"@liveblocks/react-lexical"` for Lexical. Export and
+Remember to import from `"@liveblocks/react-lexical"` for Lexical. Import and
 use `{ FloatingToolbar }` if you'd like to modify the floating version.
 
 ```tsx
 import { FloatingToolbar, Toolbar } from "@liveblocks/react-lexical";
 import { Icon } from "@liveblocks/react-ui";
-import { Editor } from "@tiptap/react";
+import { LexicalEditor } from "lexical";
 
-function CustomToolbar({ editor }: { editor: Editor | null }) {
+function CustomToolbar({ editor }: { editor: LexicalEditor | null }) {
   return (
     <FloatingToolbar editor={editor}>
       <Toolbar.SectionHistory />
@@ -218,7 +218,7 @@ function CustomToolbar({ editor }: { editor: Editor | null }) {
       <Toolbar.Button
         name="Help"
         icon={<Icon.QuestionMark />}
-        shortcut="CMD-H"
+        shortcut="Cmd+H"
         onClick={() => console.log("help")}
       />
       <Toolbar.Toggle

@@ -22,7 +22,7 @@ function Storage() {
 
 ## Examples
 
-Here's some more comples examples, given the following Storage types:
+Here's some more complex examples, given the following Storage types:
 
 ```ts file="liveblocks.config.ts"
 import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
@@ -67,7 +67,7 @@ const firstShapeColor = useStorage((root) => root.shapes[0].color);
 // Renders when only the first shape's first tag changes
 const firstShapeTags = useStorage((root) => root.shapes[0].tags[0]);
 
-// Renders when only the a shape's first tag length changes
+// Renders when only a shape's first tag length changes
 const thisShapesTagLength = useStorage(
   (root) => root.shapes[SHAPE_INDEX].tags.length
 );
