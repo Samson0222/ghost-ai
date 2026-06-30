@@ -92,7 +92,7 @@ function ShapeFrame({
   if (shape === "diamond") {
     return (
       <div className="relative h-full w-full">
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg className="absolute inset-0 h-full w-full" style={{ pointerEvents: "none" }} viewBox="0 0 100 100" preserveAspectRatio="none">
           <polygon points="50,0 100,50 50,100 0,50" fill={fill} stroke={stroke} strokeWidth="1.5" />
         </svg>
         <div className="relative flex h-full w-full items-center justify-center">{children}</div>
@@ -103,7 +103,7 @@ function ShapeFrame({
   if (shape === "hexagon") {
     return (
       <div className="relative h-full w-full">
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg className="absolute inset-0 h-full w-full" style={{ pointerEvents: "none" }} viewBox="0 0 100 100" preserveAspectRatio="none">
           <polygon points="25,0 75,0 100,50 75,100 25,100 0,50" fill={fill} stroke={stroke} strokeWidth="1.5" />
         </svg>
         <div className="relative flex h-full w-full items-center justify-center">{children}</div>
@@ -114,7 +114,7 @@ function ShapeFrame({
   if (shape === "cylinder") {
     return (
       <div className="relative h-full w-full">
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg className="absolute inset-0 h-full w-full" style={{ pointerEvents: "none" }} viewBox="0 0 100 100" preserveAspectRatio="none">
           <rect x="0" y="15" width="100" height="70" fill={fill} />
           <line x1="0" y1="15" x2="0" y2="85" stroke={stroke} strokeWidth="1.5" />
           <line x1="100" y1="15" x2="100" y2="85" stroke={stroke} strokeWidth="1.5" />

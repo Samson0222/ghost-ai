@@ -57,7 +57,7 @@ export function CanvasEdgeRenderer({
     if (e.key === "Enter" || e.key === "Escape") commitEdit();
   }
 
-  const strokeColor = selected ? "var(--accent-primary)" : "#f8fafc";
+  const strokeColor = selected ? "#ffffff" : "#f8fafc";
   const strokeOpacity = isActive ? 1 : 0.38;
 
   return (

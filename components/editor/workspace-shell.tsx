@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { PanelLeftClose, PanelLeftOpen, Share2, BrainCircuit, LayoutTemplate } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
+import { useState, useRef, useCallback } from "react";
+import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles, LayoutTemplate, CloudUpload, Check, CloudOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProjectSidebar } from "./project-sidebar";
 import { ProjectDialogContext } from "./project-dialog-context";
@@ -14,7 +13,8 @@ import { StarterTemplatesModal } from "./starter-templates-modal";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import { useShareDialog } from "@/hooks/use-share-dialog";
 import { CanvasRoomWrapper } from "./canvas-room-wrapper";
-import type { LoadTemplateFn } from "./canvas";
+import { AISidebar } from "./ai-sidebar";
+import type { LoadTemplateFn, SaveStatus, ManualSaveFn } from "./canvas";
 import type { ProjectRecord } from "@/lib/projects";
 
 interface WorkspaceShellProps {
@@ -28,9 +28,15 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const loadTemplateRef = useRef<LoadTemplateFn | null>(null);
+  const saveTriggerRef = useRef<ManualSaveFn | null>(null);
   const actions = useProjectActions();
   const share = useShareDialog(project.id);
+
+  const handleSaveStatusChange = useCallback((status: SaveStatus) => {
+    setSaveStatus(status);
+  }, []);
 
   return (
     <ProjectDialogContext.Provider value={{ openCreate: actions.openCreate }}>
@@ -52,7 +58,33 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
           <span className="min-w-0 flex-1 truncate text-sm font-medium text-copy-primary">
             {project.name}
           </span>
+          {saveStatus !== "idle" && (
+            <span
+              className={`flex shrink-0 items-center gap-1 text-xs ${
+                saveStatus === "error" ? "text-red-400" : "text-copy-muted"
+              }`}
+            >
+              {saveStatus === "saving" && (
+                <><CloudUpload className="h-3.5 w-3.5 animate-pulse" />Saving…</>
+              )}
+              {saveStatus === "saved" && (
+                <><Check className="h-3.5 w-3.5" />Saved</>
+              )}
+              {saveStatus === "error" && (
+                <><CloudOff className="h-3.5 w-3.5" />Save failed</>
+              )}
+            </span>
+          )}
           <div className="flex shrink-0 items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              disabled={saveStatus === "saving"}
+              onClick={() => saveTriggerRef.current?.()}
+            >
+              {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Error" : "Save"}
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -73,9 +105,8 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
               className="text-copy-muted hover:text-copy-primary"
               aria-label="Toggle AI chat"
             >
-              <BrainCircuit className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
             </Button>
-            <UserButton />
           </div>
         </header>
 
@@ -92,14 +123,16 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
 
         <div className={`flex flex-1 overflow-hidden pt-12 transition-[padding] duration-200 ${isSidebarOpen ? "sm:pl-72" : ""}`}>
           <main className="flex min-w-0 flex-1 overflow-hidden bg-base">
-            <CanvasRoomWrapper roomId={project.id} loadTemplateRef={loadTemplateRef} />
+            <CanvasRoomWrapper
+              roomId={project.id}
+              loadTemplateRef={loadTemplateRef}
+              saveTriggerRef={saveTriggerRef}
+              onSaveStatusChange={handleSaveStatusChange}
+            />
           </main>
-          {isAIPanelOpen && (
-            <aside className="flex w-72 shrink-0 items-center justify-center border-l border-border-subtle bg-surface sm:w-80">
-              <p className="text-sm text-copy-faint">AI chat coming soon</p>
-            </aside>
-          )}
         </div>
+
+        <AISidebar isOpen={isAIPanelOpen} onClose={() => setIsAIPanelOpen(false)} />
       </div>
 
       <CreateProjectDialog

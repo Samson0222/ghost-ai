@@ -4,7 +4,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Bug fix pass (current-issue.md) — complete (round 2)
+- Feature 21 (Canvas Autosave) — complete
 
 ## Current Goal
 
@@ -35,13 +35,19 @@ Update this file whenever the current phase, active feature, or implementation s
 
 - **Starter Templates (Feature 18)** — `components/editor/starter-templates.ts` defines `CanvasTemplate` interface (id, name, description, nodes, edges) and `CANVAS_TEMPLATES` array with three predefined templates: Microservices (API gateway → auth/user/order services → dedicated DBs), CI/CD Pipeline (commit → build → test → artifact store → staging → production), and Event-Driven System (producers → event bus → consumers + dead-letter queue); templates use shared `CanvasNode`/`CanvasEdge` types and `NODE_COLORS`; `components/editor/starter-templates-modal.tsx` dialog with a responsive grid of template cards — each card renders an inline SVG preview (bounding-box scaled to a 280×150 viewport, edges as lines between node centers, nodes as shape-appropriate SVG primitives mirroring `canvas-node.tsx` shape logic) plus name, description, and Import button; Import calls `onImport(template)` and closes the dialog; `canvas.tsx` exports `LoadTemplateFn` type and adds `loadTemplateRef` prop to `Canvas`/`CanvasContent`; `CanvasContent` registers `loadTemplateRef.current` on mount using a stable-ref pattern (always-fresh `nodesRef`/`edgesRef` to avoid stale closures); on call, batches all existing node/edge removes + template node/edge adds into single `onNodesChange`/`onEdgesChange` calls then fits view after 100ms; `canvas-room-wrapper.tsx` accepts and forwards `loadTemplateRef`; `workspace-shell.tsx` adds `useRef<LoadTemplateFn | null>`, `isTemplatesOpen` state, a "Templates" `<Button>` in the navbar (LayoutTemplate icon), `<CanvasRoomWrapper loadTemplateRef={...}>`, and `<StarterTemplatesModal onImport={(t) => loadTemplateRef.current?.(t)}>`. `npm run build` passes.
 
+- **Presence Avatars + Live Cursors (Feature 19)** — `liveblocks.config.ts` updated: `isThinking` renamed to `thinking` to match spec; `canvas-room-wrapper.tsx` updated `initialPresence` accordingly; `components/editor/live-cursors.tsx` — new component, uses `useOthers` from `@liveblocks/react` and `useViewport` from `@xyflow/react`, transforms flow coordinates to screen coordinates (`flowX * zoom + vpX`) and renders colored SVG arrow cursors with name badges for each other participant who has a non-null cursor; `components/editor/presence-avatars.tsx` — new component, uses `useOthers` and `useAuth` (Clerk), filters others by Clerk user ID to exclude current user and any of their other tabs, renders up to 5 collaborator avatars in an overlapping stack (profile photo or initials fallback, presence-color ring via `box-shadow`), +N overflow chip when more than 5, divider only when collaborators exist, Clerk `UserButton` for current user; `canvas.tsx` imports `useUpdateMyPresence`, adds `handleMouseMove`/`handleMouseLeave` on the wrapper div to broadcast flow-coordinate cursor position via presence, removes `<Cursors />` from `@liveblocks/react-flow`, renders `<LiveCursors />` and `<PresenceAvatars />` as absolute overlays inside the canvas wrapper; workspace navbar and editor home navbar unchanged. `npm run build` passes.
+
+- **AI Sidebar Shell (Feature 20)** — `components/editor/ai-sidebar.tsx` new component: fixed floating panel (`right-0 top-12 bottom-0 z-40`, `w-80`) with slide-in/out via `translate-x-0`/`translate-x-full` and `transition-transform duration-200`; header with `BotMessageSquare` icon, "AI Workspace" title, "Collaborate with Ghost AI" subtitle, and close button; shadcn `Tabs` with `line` variant — "AI Architect" and "Specs" tabs, active tab underlined in AI accent color (`after:bg-ai data-active:text-ai-text`); AI Architect tab: `ScrollArea`-scrollable chat area, empty state with bot icon + description + three starter prompt chips (`bg-subtle text-ai-text rounded-full`), chat message rendering (user messages right-aligned `bg-brand-dim border-brand/50`, assistant left-aligned `bg-elevated border-border-subtle text-ai-text`), auto-resizing `Textarea` (72px min / 160px max, JS height reset on send), `Enter` submits / `Shift+Enter` newline, send button `bg-ai text-white`; Specs tab: "Generate Spec" button `bg-ai text-white`, demo spec card `bg-elevated border-border-subtle rounded-2xl` with FileText icon + title + snippet + disabled download button; `workspace-shell.tsx` updated to import `AISidebar`, remove inline aside from flex layout, render `<AISidebar isOpen={isAIPanelOpen} onClose={...} />` as a sibling. `npm run build` passes.
+
+- **Canvas Autosave (Feature 21)** — `@vercel/blob` installed (`v2.5.0`); `canvasJsonPath String?` field on `Project` model already existed — no migration needed; `app/api/projects/[projectId]/canvas/route.ts` — PUT receives `{ nodes, edges }` JSON, calls `put("canvas/{projectId}.json", …, { allowOverwrite: true })` on Vercel Blob and stores returned URL in `canvasJsonPath` via Prisma; GET reads `canvasJsonPath` from Prisma, fetches blob, and returns `{ canvas }` or `{ canvas: null }` if not yet saved; `hooks/use-canvas-autosave.ts` — debounces saves by 2 s, skips the first render (so initial room load does not trigger a redundant save), tracks `SaveStatus` (`idle | saving | saved | error`), notifies parent via `onStatusChange` callback ref; `canvas.tsx` updated — `CanvasContent` accepts `projectId` and `onSaveStatusChange`; one-shot mount effect checks if the Liveblocks room is empty and, if so, fetches saved canvas from the GET route and batch-adds nodes/edges via `onNodesChange`/`onEdgesChange` then fits view (room with existing content skips load entirely); `useCanvasAutosave` wired in `CanvasContent`; `SaveStatus` re-exported from `canvas.tsx`; `Canvas` and `CanvasRoomWrapper` props updated to thread `projectId` / `onSaveStatusChange` through; `workspace-shell.tsx` — `saveStatus` state + `handleSaveStatusChange` callback (`useCallback`), small inline indicator in navbar after project name: `CloudUpload` + "Saving…" (pulsing), `Check` + "Saved", `CloudOff` + "Save failed" (red); hidden when `idle`. `npm run build` passes.
+
 ## In Progress
 
 - None.
 
 ## Next Up
 
-- Continue with next feature spec after Feature 18.
+- Continue with next feature spec after Feature 21.
 
 ## Recent Fixes
 
@@ -66,6 +72,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - **Canvas styling** — `colorMode="dark"` on `ReactFlow`; `globals.css` strips React Flow default box-shadows on nodes (`!important`) and panels; `.react-flow__pane` cursor reset.
 - **AI sidebar** — now `fixed right-0 top-12 bottom-0 z-40`, floating over canvas instead of pushing it.
 - **Project sidebar** — `fixed left-0 top-12 z-40` with `translate-x-0`/`-translate-x-full` animation; floats over canvas, fully hidden when toggled off.
+- **Canvas keyboard deletion** — Delete/Backspace now use a focusable canvas wrapper keydown listener, read selected nodes/edges from React Flow `useNodes()`/`useEdges()`, and remove them through Liveblocks React Flow `onDelete` so collaborative deletion syncs; deleting selected nodes also removes their connected edges.
 
 ## Open Questions
 
