@@ -60,6 +60,8 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
           </span>
           {saveStatus !== "idle" && (
             <span
+              aria-live={saveStatus === "error" ? "assertive" : "polite"}
+              aria-atomic="true"
               className={`flex shrink-0 items-center gap-1 text-xs ${
                 saveStatus === "error" ? "text-red-400" : "text-copy-muted"
               }`}

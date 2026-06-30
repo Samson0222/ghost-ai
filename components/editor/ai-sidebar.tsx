@@ -30,6 +30,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isComposingRef = useRef(false);
 
   const resetTextarea = useCallback(() => {
     if (textareaRef.current) {
@@ -50,7 +51,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && !e.shiftKey) {
+      if (e.key === "Enter" && !e.shiftKey && !isComposingRef.current) {
         e.preventDefault();
         handleSend();
       }
@@ -71,6 +72,8 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
   return (
     <aside
+      aria-hidden={!isOpen}
+      inert={!isOpen || undefined}
       className={cn(
         "fixed right-0 top-12 bottom-0 z-40 flex w-80 flex-col",
         "border-l border-border-subtle bg-surface/95 shadow-2xl backdrop-blur-sm",
@@ -155,7 +158,10 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                onCompositionStart={() => { isComposingRef.current = true; }}
+                onCompositionEnd={() => { isComposingRef.current = false; }}
                 placeholder="Describe your architecture..."
+                aria-label="Message input"
                 className="min-h-[72px] max-h-[160px] resize-none overflow-y-auto border-border-subtle bg-elevated text-xs text-copy-primary placeholder:text-copy-faint"
                 style={{ height: "72px" }}
               />

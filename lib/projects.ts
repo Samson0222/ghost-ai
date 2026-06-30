@@ -36,15 +36,19 @@ export async function getSharedProjects(): Promise<ProjectRecord[]> {
   const ownerIds = [...new Set(collaborations.map((c) => c.project.ownerId))];
   const ownerNameMap = new Map<string, string>();
 
+  const CHUNK_SIZE = 100;
   try {
     const client = await clerkClient();
-    const { data: owners } = await client.users.getUserList({ userId: ownerIds });
-    for (const o of owners) {
-      const parts = [o.firstName, o.lastName].filter(Boolean);
-      ownerNameMap.set(
-        o.id,
-        parts.length > 0 ? parts.join(" ") : (o.primaryEmailAddress?.emailAddress ?? o.id)
-      );
+    for (let i = 0; i < ownerIds.length; i += CHUNK_SIZE) {
+      const chunk = ownerIds.slice(i, i + CHUNK_SIZE);
+      const { data: owners } = await client.users.getUserList({ userId: chunk, limit: chunk.length });
+      for (const o of owners) {
+        const parts = [o.firstName, o.lastName].filter(Boolean);
+        ownerNameMap.set(
+          o.id,
+          parts.length > 0 ? parts.join(" ") : (o.primaryEmailAddress?.emailAddress ?? o.id)
+        );
+      }
     }
   } catch {
     // Clerk lookup failed — fall back to no owner name

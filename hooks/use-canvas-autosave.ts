@@ -21,15 +21,21 @@ export function useCanvasAutosave(
   const onStatusChangeRef = useRef(onStatusChange);
   const nodesRef = useRef(nodes);
   const edgesRef = useRef(edges);
-  onStatusChangeRef.current = onStatusChange;
-  nodesRef.current = nodes;
-  edgesRef.current = edges;
+
+  useEffect(() => {
+    onStatusChangeRef.current = onStatusChange;
+  }, [onStatusChange]);
+
+  useEffect(() => {
+    nodesRef.current = nodes;
+    edgesRef.current = edges;
+  }, [nodes, edges]);
 
   function notify(next: SaveStatus) {
+    if (resetRef.current) clearTimeout(resetRef.current);
     setStatus(next);
     onStatusChangeRef.current?.(next);
     if (next === "saved" || next === "error") {
-      if (resetRef.current) clearTimeout(resetRef.current);
       resetRef.current = setTimeout(() => {
         setStatus("idle");
         onStatusChangeRef.current?.("idle");

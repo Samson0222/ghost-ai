@@ -16,20 +16,21 @@ export async function PUT(
   const project = await getProjectWithAccess(projectId);
   if (!project) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const body = await request.json();
-
-  const blob = await put(`canvas/${projectId}.json`, JSON.stringify(body), {
-    access: "private",
-    contentType: "application/json",
-    allowOverwrite: true,
-  });
-
-  await prisma.project.update({
-    where: { id: projectId },
-    data: { canvasJsonPath: blob.url },
-  });
-
-  return NextResponse.json({ url: blob.url });
+  try {
+    const body = await request.json();
+    const blob = await put(`canvas/${projectId}.json`, JSON.stringify(body), {
+      access: "private",
+      contentType: "application/json",
+      allowOverwrite: true,
+    });
+    await prisma.project.update({
+      where: { id: projectId },
+      data: { canvasJsonPath: blob.url },
+    });
+    return NextResponse.json({ url: blob.url });
+  } catch {
+    return NextResponse.json({ error: "Failed to save canvas" }, { status: 500 });
+  }
 }
 
 export async function GET(

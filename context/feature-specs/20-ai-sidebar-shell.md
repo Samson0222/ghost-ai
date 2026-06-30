@@ -5,23 +5,23 @@ Complete the existing AI sidebar placeholder and turn it into a proper floating 
 1. Separate the AI sidebar into its own component.
    - keep the open/close state controlled by the parent
    - preserve the existing slide animation, floating position, border, background, and shadow styling
-   - use sidebar surface styles like `bg-base/95`, `border-surface-border`, and the current shadow treatment
+   - use sidebar surface styles like `bg-surface/95`, `border-border-subtle`, and the current shadow treatment
 
 2. Add the sidebar header.
    - title: `AI Workspace`
    - subtitle: `Collaborate with Ghost AI`
    - small bot icon
    - close button aligned to the right
-   - use `text-primary-text` for the title
-   - use `text-muted-text` for the subtitle
+   - use `text-copy-primary` for the title
+   - use `text-copy-muted` for the subtitle
 
 3. Add a tabbed layout with two tabs.
 
    Use shadcn `Tabs`.
    - `AI Architect`
    - `Specs`
-   - active tab should use the accent styling, like `bg-accent` and `text-accent`
-   - inactive tab text should stay muted with `text-muted-text`
+   - active tab should use the accent styling, like `bg-ai` and `text-ai-text`
+   - inactive tab text should stay muted with `text-copy-muted`
 
 4. Build the AI Architect tab.
 
@@ -32,17 +32,17 @@ Complete the existing AI sidebar placeholder and turn it into a proper floating 
      - `Design an e-commerce backend`
      - `Create a chat app architecture`
      - `Build a CI/CD pipeline`
-   - style starter chips as soft pills using `bg-subtle` and `text-accent-text`
+   - style starter chips as soft pills using `bg-subtle` and `text-ai-text`
    - user messages should be right-aligned with `bg-brand-dim border-brand/50 border-2 text-copy-primary`
-   - assistant messages should be left-aligned with `bg-elevated border border-surface-border text-accent-text`
+   - assistant messages should be left-aligned with `bg-elevated border border-border-subtle text-ai-text`
    - input area with an auto-resizing textarea, around 72px min height and 160px max height
-   - send button should use `bg-accent text-white`
+   - send button should use `bg-ai text-white`
    - `Enter` submits, `Shift+Enter` adds a newline
 
 5. Build the Specs tab.
-   - show a `Generate Spec` button using `bg-accent text-white`
+   - show a `Generate Spec` button using `bg-ai text-white`
    - show a demo spec card for now
-   - style the card with `bg-elevated` and `border-surface-border`
+   - style the card with `bg-elevated` and `border-border-subtle`
    - include a file/spec icon, title, short snippet, and disabled download action
 
 6. Use the existing project color tokens.

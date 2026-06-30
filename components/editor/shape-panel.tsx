@@ -53,19 +53,13 @@ interface ShapePanelProps {
 
 export function ShapePanel({ onInsert }: ShapePanelProps) {
   function handleDragStart(e: React.DragEvent, config: ShapeConfig) {
-    // Record where inside the button the user grabbed so the drop handler
-    // can place the node exactly where the cursor is, not offset by grab position.
-    const btn = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const grabOffsetX = e.clientX - btn.left;
-    const grabOffsetY = e.clientY - btn.top;
-
     const payload = {
       shape: config.shape,
       label: config.label,
       width: config.width,
       height: config.height,
-      grabOffsetX,
-      grabOffsetY,
+      grabOffsetX: config.width / 2,
+      grabOffsetY: config.height / 2,
     } satisfies ShapeDragPayload;
     const json = JSON.stringify(payload);
     e.dataTransfer.setData(SHAPE_DRAG_TYPE, json);

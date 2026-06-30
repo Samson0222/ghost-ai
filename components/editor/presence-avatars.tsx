@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useOthers } from "@liveblocks/react";
 import { useAuth, UserButton } from "@clerk/nextjs";
 
@@ -43,9 +44,11 @@ export function PresenceAvatars() {
                     }}
                   >
                     {avatar ? (
-                      <img
+                      <Image
                         src={avatar}
                         alt={name}
+                        width={32}
+                        height={32}
                         className="h-8 w-8 rounded-full object-cover"
                         style={{
                           boxShadow: `0 0 0 2px ${color}, 0 0 0 3.5px rgba(0,0,0,0.5)`,

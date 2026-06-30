@@ -164,14 +164,17 @@ function CanvasContent({ loadTemplateRef, saveTriggerRef, projectId, onSaveStatu
   const onEdgesChangeRef = useRef(onEdgesChange);
   const onDeleteRef = useRef(onDelete);
   const instanceRef = useRef(instance);
-  nodesRef.current = nodes;
-  edgesRef.current = edges;
-  flowNodesRef.current = flowNodes;
-  flowEdgesRef.current = flowEdges;
-  onNodesChangeRef.current = onNodesChange;
-  onEdgesChangeRef.current = onEdgesChange;
-  onDeleteRef.current = onDelete;
   instanceRef.current = instance;
+
+  useEffect(() => {
+    nodesRef.current = nodes;
+    edgesRef.current = edges;
+    flowNodesRef.current = flowNodes;
+    flowEdgesRef.current = flowEdges;
+    onNodesChangeRef.current = onNodesChange;
+    onEdgesChangeRef.current = onEdgesChange;
+    onDeleteRef.current = onDelete;
+  }, [nodes, edges, flowNodes, flowEdges, onNodesChange, onEdgesChange, onDelete]);
 
   useEffect(() => {
     if (!loadTemplateRef) return;
