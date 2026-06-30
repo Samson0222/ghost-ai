@@ -9,7 +9,7 @@ export interface GenerateDesignPayload {
   };
 }
 
-export const generateDesignTask = task({
+const generateDesignTask = task({
   id: "generate-design",
   maxDuration: 300,
   run: async (payload: GenerateDesignPayload) => {

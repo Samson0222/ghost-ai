@@ -8,7 +8,7 @@ export interface GenerateSpecPayload {
   };
 }
 
-export const generateSpecTask = task({
+const generateSpecTask = task({
   id: "generate-spec",
   maxDuration: 300,
   run: async (payload: GenerateSpecPayload) => {
