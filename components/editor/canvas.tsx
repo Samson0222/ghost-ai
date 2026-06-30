@@ -11,9 +11,13 @@ import {
   ConnectionMode,
   MarkerType,
   useReactFlow,
+  useNodes,
+  useEdges,
 } from "@xyflow/react";
-import { useLiveblocksFlow, Cursors } from "@liveblocks/react-flow";
-import { useUndo, useRedo, useCanUndo, useCanRedo } from "@liveblocks/react";
+import { useLiveblocksFlow } from "@liveblocks/react-flow";
+import { useUndo, useRedo, useCanUndo, useCanRedo, useUpdateMyPresence } from "@liveblocks/react";
+import { LiveCursors } from "./live-cursors";
+import { PresenceAvatars } from "./presence-avatars";
 import { Minus, Plus, Maximize2, Undo2, Redo2 } from "lucide-react";
 import type { CanvasNode, CanvasEdge } from "@/types/canvas";
 import { NODE_COLORS, NODE_SHAPES } from "@/types/canvas";
@@ -23,6 +27,10 @@ import { ShapePanel, SHAPE_DRAG_TYPE } from "./shape-panel";
 import type { ShapeDragPayload } from "./shape-panel";
 import type { CanvasTemplate } from "./starter-templates";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useCanvasAutosave } from "@/hooks/use-canvas-autosave";
+import type { SaveStatus } from "@/hooks/use-canvas-autosave";
+
+export type ManualSaveFn = () => void;
 import "@xyflow/react/dist/style.css";
 import "@liveblocks/react-ui/styles.css";
 import "@liveblocks/react-flow/styles.css";
@@ -36,6 +44,7 @@ const defaultEdgeOptions = {
 const LIVEBLOCKS_FLOW_STORAGE_KEY = "ghostCanvasFlow";
 
 export type LoadTemplateFn = (template: CanvasTemplate) => void;
+export type { SaveStatus };
 
 let nodeCounter = 0;
 
@@ -54,6 +63,7 @@ function isShapeDragPayload(value: unknown): value is ShapeDragPayload {
     typeof payload.height === "number" &&
     Number.isFinite(payload.height) &&
     payload.height > 0
+    // grabOffsetX/Y are optional for backwards compatibility with older payloads
   );
 }
 
@@ -117,9 +127,12 @@ function CanvasControlBar({
 
 interface CanvasContentProps {
   loadTemplateRef?: React.MutableRefObject<LoadTemplateFn | null>;
+  saveTriggerRef?: React.MutableRefObject<ManualSaveFn | null>;
+  projectId: string;
+  onSaveStatusChange?: (status: SaveStatus) => void;
 }
 
-function CanvasContent({ loadTemplateRef }: CanvasContentProps) {
+function CanvasContent({ loadTemplateRef, saveTriggerRef, projectId, onSaveStatusChange }: CanvasContentProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
     useLiveblocksFlow<CanvasNode, CanvasEdge>({
       suspense: true,
@@ -129,8 +142,11 @@ function CanvasContent({ loadTemplateRef }: CanvasContentProps) {
     });
 
   const instance = useReactFlow<CanvasNode, CanvasEdge>();
+  const flowNodes = useNodes<CanvasNode>();
+  const flowEdges = useEdges<CanvasEdge>();
   const { screenToFlowPosition } = instance;
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const updateMyPresence = useUpdateMyPresence();
 
   const undo = useUndo();
   const redo = useRedo();
@@ -142,14 +158,23 @@ function CanvasContent({ loadTemplateRef }: CanvasContentProps) {
   // Keep always-fresh refs so loadTemplate never closes over stale state
   const nodesRef = useRef(nodes);
   const edgesRef = useRef(edges);
+  const flowNodesRef = useRef(flowNodes);
+  const flowEdgesRef = useRef(flowEdges);
   const onNodesChangeRef = useRef(onNodesChange);
   const onEdgesChangeRef = useRef(onEdgesChange);
+  const onDeleteRef = useRef(onDelete);
   const instanceRef = useRef(instance);
-  nodesRef.current = nodes;
-  edgesRef.current = edges;
-  onNodesChangeRef.current = onNodesChange;
-  onEdgesChangeRef.current = onEdgesChange;
   instanceRef.current = instance;
+
+  useEffect(() => {
+    nodesRef.current = nodes;
+    edgesRef.current = edges;
+    flowNodesRef.current = flowNodes;
+    flowEdgesRef.current = flowEdges;
+    onNodesChangeRef.current = onNodesChange;
+    onEdgesChangeRef.current = onEdgesChange;
+    onDeleteRef.current = onDelete;
+  }, [nodes, edges, flowNodes, flowEdges, onNodesChange, onEdgesChange, onDelete]);
 
   useEffect(() => {
     if (!loadTemplateRef) return;
@@ -173,17 +198,113 @@ function CanvasContent({ loadTemplateRef }: CanvasContentProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadTemplateRef]);
 
+  // Load saved canvas from blob if the Liveblocks room is empty on mount
+  useEffect(() => {
+    if (nodesRef.current.length > 0 || edgesRef.current.length > 0) return;
+
+    let cancelled = false;
+
+    async function loadSavedCanvas() {
+      try {
+        const res = await fetch(`/api/projects/${projectId}/canvas`);
+        if (!res.ok || cancelled) return;
+
+        const data = (await res.json()) as { canvas: { nodes: CanvasNode[]; edges: CanvasEdge[] } | null };
+        if (!data?.canvas || cancelled) return;
+
+        const savedNodes = data.canvas.nodes ?? [];
+        const savedEdges = data.canvas.edges ?? [];
+        if (savedNodes.length === 0 && savedEdges.length === 0) return;
+
+        onNodesChangeRef.current(savedNodes.map((nd) => ({ type: "add" as const, item: nd })));
+        onEdgesChangeRef.current(savedEdges.map((eg) => ({ type: "add" as const, item: eg })));
+        setTimeout(() => instanceRef.current.fitView({ duration: 300 }), 100);
+      } catch {
+        // silently skip if the load fails
+      }
+    }
+
+    loadSavedCanvas();
+    return () => { cancelled = true; };
+  // Intentionally empty — runs once on mount; refs used for stable callbacks
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const { triggerSave } = useCanvasAutosave(projectId, nodes, edges, onSaveStatusChange);
+
+  useEffect(() => {
+    if (!saveTriggerRef) return;
+    saveTriggerRef.current = triggerSave;
+    return () => { saveTriggerRef.current = null; };
+  }, [saveTriggerRef, triggerSave]);
+
+  // Delete/Backspace removes selected nodes and edges through Liveblocks.
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Delete" && e.key !== "Backspace") return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+      ) return;
+
+      const selectedNodes = flowNodesRef.current.filter((n) => n.selected);
+      const selectedEdges = flowEdgesRef.current.filter((eg) => eg.selected);
+      if (selectedNodes.length === 0 && selectedEdges.length === 0) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const selectedNodeIds = new Set(selectedNodes.map((node) => node.id));
+      const selectedEdgeIds = new Set(selectedEdges.map((edge) => edge.id));
+      const connectedEdges = flowEdgesRef.current.filter(
+        (edge) =>
+          !selectedEdgeIds.has(edge.id) &&
+          (selectedNodeIds.has(edge.source) || selectedNodeIds.has(edge.target))
+      );
+
+      onDeleteRef.current({
+        nodes: selectedNodes,
+        edges: [...selectedEdges, ...connectedEdges],
+      });
+    }
+
+    wrapper.addEventListener("keydown", handleKeyDown, true);
+    return () => wrapper.removeEventListener("keydown", handleKeyDown, true);
+  // refs are stable — no deps needed
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function handlePointerDownCapture(event: React.PointerEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement | null;
+    if (
+      target?.tagName === "INPUT" ||
+      target?.tagName === "TEXTAREA" ||
+      target?.isContentEditable
+    ) return;
+
+    wrapperRef.current?.focus({ preventScroll: true });
+  }
+
   function insertShapeAtClientPoint(payload: ShapeDragPayload, point: { x: number; y: number }) {
-    const position = screenToFlowPosition(point);
+    // Adjust cursor position by grab offset so the node's top-left lands where
+    // the user originally grabbed inside the drag button, then recenter to cursor.
+    const grabX = payload.grabOffsetX ?? payload.width / 2;
+    const grabY = payload.grabOffsetY ?? payload.height / 2;
+    const topLeft = screenToFlowPosition({
+      x: point.x - grabX,
+      y: point.y - grabY,
+    });
     const id = `${payload.shape}-${Date.now()}-${++nodeCounter}`;
 
     const newNode: CanvasNode = {
       id,
       type: "canvasNode",
-      position: {
-        x: position.x - payload.width / 2,
-        y: position.y - payload.height / 2,
-      },
+      position: topLeft,
       data: {
         label: payload.label,
         color: NODE_COLORS[0].fill,
@@ -194,6 +315,15 @@ function CanvasContent({ loadTemplateRef }: CanvasContentProps) {
     };
 
     onNodesChange([{ type: "add", item: newNode }]);
+  }
+
+  function handleMouseMove(event: React.MouseEvent) {
+    const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+    updateMyPresence({ cursor: position });
+  }
+
+  function handleMouseLeave() {
+    updateMyPresence({ cursor: null });
   }
 
   function handleDragOver(event: DragEvent) {
@@ -235,7 +365,11 @@ function CanvasContent({ loadTemplateRef }: CanvasContentProps) {
   return (
     <div
       ref={wrapperRef}
-      className="relative h-full w-full bg-base"
+      className="relative h-full w-full bg-base outline-none"
+      tabIndex={0}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onPointerDownCapture={handlePointerDownCapture}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
@@ -245,17 +379,18 @@ function CanvasContent({ loadTemplateRef }: CanvasContentProps) {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onDelete={onDelete}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         connectionMode={ConnectionMode.Loose}
+        deleteKeyCode={null}
         colorMode="dark"
         fitView
       >
         <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="#4a4a5a" />
-        <Cursors />
       </ReactFlow>
+      <LiveCursors />
+      <PresenceAvatars />
       <ShapePanel onInsert={handleInsertShape} />
       <CanvasControlBar
         onZoomIn={() => instance.zoomIn({ duration: 200 })}
@@ -272,12 +407,20 @@ function CanvasContent({ loadTemplateRef }: CanvasContentProps) {
 
 interface CanvasProps {
   loadTemplateRef?: React.MutableRefObject<LoadTemplateFn | null>;
+  saveTriggerRef?: React.MutableRefObject<ManualSaveFn | null>;
+  projectId: string;
+  onSaveStatusChange?: (status: SaveStatus) => void;
 }
 
-export function Canvas({ loadTemplateRef }: CanvasProps) {
+export function Canvas({ loadTemplateRef, saveTriggerRef, projectId, onSaveStatusChange }: CanvasProps) {
   return (
     <ReactFlowProvider>
-      <CanvasContent loadTemplateRef={loadTemplateRef} />
+      <CanvasContent
+        loadTemplateRef={loadTemplateRef}
+        saveTriggerRef={saveTriggerRef}
+        projectId={projectId}
+        onSaveStatusChange={onSaveStatusChange}
+      />
     </ReactFlowProvider>
   );
 }

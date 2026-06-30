@@ -99,6 +99,7 @@ export function ProjectSidebar({
                       project={project}
                       isActive={project.id === activeProjectId}
                       onOpen={onClose}
+                      showOwner
                     />
                   ))}
                 </div>
@@ -124,18 +125,29 @@ interface ProjectItemProps {
   onOpen?: () => void;
   onRename?: (project: ProjectRecord) => void;
   onDelete?: (project: ProjectRecord) => void;
+  showOwner?: boolean;
 }
 
-function ProjectItem({ project, isActive, onOpen, onRename, onDelete }: ProjectItemProps) {
+function ProjectItem({ project, isActive, onOpen, onRename, onDelete, showOwner }: ProjectItemProps) {
   return (
     <div className={`group flex items-center justify-between rounded-lg ${isActive ? "bg-subtle" : "hover:bg-subtle"}`}>
       <Link
         href={`/editor/${project.id}`}
         onClick={onOpen}
         aria-current={isActive ? "page" : undefined}
-        className={`min-w-0 flex-1 truncate px-2 py-1.5 text-sm ${isActive ? "font-medium text-copy-primary" : "text-copy-secondary"}`}
+        className={`min-w-0 flex-1 truncate px-2 py-1.5 ${isActive ? "font-medium text-copy-primary" : "text-copy-secondary"}`}
       >
-        {project.name}
+        <span className="block truncate text-sm">{project.name}</span>
+        {showOwner && (
+          <span className="mt-0.5 flex items-center gap-1.5">
+            <span className="truncate text-xs text-copy-faint">
+              {project.ownerName ? `by ${project.ownerName}` : "Shared with you"}
+            </span>
+            <span className="shrink-0 rounded-full bg-brand/15 px-1.5 py-px text-[10px] font-medium text-brand">
+              Collaborator
+            </span>
+          </span>
+        )}
       </Link>
       {(onRename || onDelete) && (
         <div className="mr-1 flex shrink-0 items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">

@@ -25,6 +25,8 @@ export interface ShapeDragPayload {
   label: string;
   width: number;
   height: number;
+  grabOffsetX: number;
+  grabOffsetY: number;
 }
 
 export const SHAPE_DRAG_TYPE = "application/ghost-shape";
@@ -56,6 +58,8 @@ export function ShapePanel({ onInsert }: ShapePanelProps) {
       label: config.label,
       width: config.width,
       height: config.height,
+      grabOffsetX: config.width / 2,
+      grabOffsetY: config.height / 2,
     } satisfies ShapeDragPayload;
     const json = JSON.stringify(payload);
     e.dataTransfer.setData(SHAPE_DRAG_TYPE, json);
@@ -113,6 +117,8 @@ export function ShapePanel({ onInsert }: ShapePanelProps) {
                 label: config.label,
                 width: config.width,
                 height: config.height,
+                grabOffsetX: config.width / 2,
+                grabOffsetY: config.height / 2,
               })
             }
             title={config.label}

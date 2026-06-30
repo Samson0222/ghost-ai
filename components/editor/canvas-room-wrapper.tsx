@@ -3,7 +3,7 @@
 import React from "react";
 import { LiveblocksProvider, RoomProvider, ClientSideSuspense } from "@liveblocks/react/suspense";
 import { Canvas } from "./canvas";
-import type { LoadTemplateFn } from "./canvas";
+import type { LoadTemplateFn, SaveStatus, ManualSaveFn } from "./canvas";
 
 class CanvasErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -35,6 +35,8 @@ class CanvasErrorBoundary extends React.Component<
 interface CanvasRoomWrapperProps {
   roomId: string;
   loadTemplateRef?: React.MutableRefObject<LoadTemplateFn | null>;
+  saveTriggerRef?: React.MutableRefObject<ManualSaveFn | null>;
+  onSaveStatusChange?: (status: SaveStatus) => void;
 }
 
 async function authorizeLiveblocksRoom(room?: string) {
@@ -57,12 +59,12 @@ async function authorizeLiveblocksRoom(room?: string) {
   return await response.json();
 }
 
-export function CanvasRoomWrapper({ roomId, loadTemplateRef }: CanvasRoomWrapperProps) {
+export function CanvasRoomWrapper({ roomId, loadTemplateRef, saveTriggerRef, onSaveStatusChange }: CanvasRoomWrapperProps) {
   return (
     <LiveblocksProvider authEndpoint={authorizeLiveblocksRoom}>
       <RoomProvider
         id={roomId}
-        initialPresence={{ cursor: null, isThinking: false }}
+        initialPresence={{ cursor: null, thinking: false }}
       >
         <CanvasErrorBoundary key={roomId}>
           <ClientSideSuspense
@@ -72,7 +74,12 @@ export function CanvasRoomWrapper({ roomId, loadTemplateRef }: CanvasRoomWrapper
               </div>
             }
           >
-            <Canvas loadTemplateRef={loadTemplateRef} />
+            <Canvas
+              loadTemplateRef={loadTemplateRef}
+              saveTriggerRef={saveTriggerRef}
+              projectId={roomId}
+              onSaveStatusChange={onSaveStatusChange}
+            />
           </ClientSideSuspense>
         </CanvasErrorBoundary>
       </RoomProvider>
