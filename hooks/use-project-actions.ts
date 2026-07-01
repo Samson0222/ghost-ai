@@ -55,7 +55,7 @@ export function useProjectActions() {
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: projectName.trim() || "Untitled Project" }),
+        body: JSON.stringify({ name: projectName.trim() || "Untitled Project", roomId }),
       });
       if (!res.ok) throw new Error("Failed to create project");
       const project = await res.json();
