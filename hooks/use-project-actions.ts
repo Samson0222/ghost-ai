@@ -86,9 +86,9 @@ export function useProjectActions() {
   async function handleDelete() {
     if (!targetProject || isLoading) return;
     setIsLoading(true);
-    const activeProjectId = Array.isArray(params?.projectId)
-      ? params.projectId[0]
-      : (params?.projectId as string | undefined);
+    const activeProjectId = Array.isArray(params?.roomId)
+      ? params.roomId[0]
+      : (params?.roomId as string | undefined);
     try {
       const res = await fetch(`/api/projects/${targetProject.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete project");
