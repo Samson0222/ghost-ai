@@ -30,6 +30,7 @@ export interface NodeData extends Record<string, unknown> {
 
 export interface EdgeData extends Record<string, unknown> {
   label?: string;
+  labelOffset?: { dx: number; dy: number };
 }
 
 export type CanvasNode = Node<NodeData, "canvasNode">;

@@ -1,10 +1,10 @@
 import { defineConfig } from "@trigger.dev/sdk";
 
 export default defineConfig({
-  // Find your project ref in the Trigger.dev dashboard → Settings → Project
-  project: "proj_YOUR_PROJECT_REF",
+  project: process.env.TRIGGER_PROJECT_REF!,
+  runtime: 'node',
   dirs: ["./trigger"],
-  maxDuration: 300,
+  maxDuration: 3600,
   retries: {
     enabledInDev: false,
     default: {

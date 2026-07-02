@@ -66,14 +66,14 @@ export const designAgentTask = task({
     const lb = getLiveblocks();
 
     await broadcast(lb, roomId, { type: "AI_THINKING_START" });
-    await broadcast(lb, roomId, { type: "AI_STATUS", message: "Analyzing your prompt…" });
+    await broadcast(lb, roomId, { type: "AI_STATUS", message: "Ghost AI is analyzing your request…" });
 
     try {
       const google = createGoogleGenerativeAI({
         apiKey: process.env.GOOGLE_AI_API_KEY ?? "",
       });
 
-      await broadcast(lb, roomId, { type: "AI_STATUS", message: "Generating design with Gemini…" });
+      await broadcast(lb, roomId, { type: "AI_STATUS", message: "Ghost AI is designing your architecture…" });
 
       const colorHints = NODE_COLORS.map(
         (c, i) => `${i}: fill ${c.fill} / text ${c.text}`

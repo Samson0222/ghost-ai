@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles, LayoutTemplate, CloudUpload, Check, CloudOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ProjectSidebar } from "./project-sidebar";
 import { ProjectDialogContext } from "./project-dialog-context";
 import { CreateProjectDialog } from "./create-project-dialog";
@@ -12,7 +13,7 @@ import { ShareDialog } from "./share-dialog";
 import { StarterTemplatesModal } from "./starter-templates-modal";
 import { useProjectActions } from "@/hooks/use-project-actions";
 import { useShareDialog } from "@/hooks/use-share-dialog";
-import { CanvasRoomWrapper } from "./canvas-room-wrapper";
+import { WorkspaceRoomProvider, CanvasRoom } from "./canvas-room-wrapper";
 import { AISidebar } from "./ai-sidebar";
 import type { LoadTemplateFn, SaveStatus, ManualSaveFn } from "./canvas";
 import type { ProjectRecord } from "@/lib/projects";
@@ -40,102 +41,110 @@ export function WorkspaceShell({ project, myProjects, sharedProjects, isOwner }:
 
   return (
     <ProjectDialogContext.Provider value={{ openCreate: actions.openCreate }}>
-      <div className="flex h-screen flex-col overflow-hidden bg-base">
-        <header className="fixed left-0 right-0 top-0 z-50 flex h-12 items-center gap-3 border-b border-border-subtle bg-surface px-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarOpen((prev) => !prev)}
-            className="shrink-0 text-copy-muted hover:text-copy-primary"
-            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-          >
-            {isSidebarOpen ? (
-              <PanelLeftClose className="h-5 w-5" />
-            ) : (
-              <PanelLeftOpen className="h-5 w-5" />
-            )}
-          </Button>
-          <span className="min-w-0 flex-1 truncate text-sm font-medium text-copy-primary">
-            {project.name}
-          </span>
-          {saveStatus !== "idle" && (
-            <span
-              aria-live={saveStatus === "error" ? "assertive" : "polite"}
-              aria-atomic="true"
-              className={`flex shrink-0 items-center gap-1 text-xs ${
-                saveStatus === "error" ? "text-red-400" : "text-copy-muted"
-              }`}
-            >
-              {saveStatus === "saving" && (
-                <><CloudUpload className="h-3.5 w-3.5 animate-pulse" />Saving…</>
-              )}
-              {saveStatus === "saved" && (
-                <><Check className="h-3.5 w-3.5" />Saved</>
-              )}
-              {saveStatus === "error" && (
-                <><CloudOff className="h-3.5 w-3.5" />Save failed</>
-              )}
-            </span>
-          )}
-          <div className="flex shrink-0 items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs"
-              disabled={saveStatus === "saving"}
-              onClick={() => saveTriggerRef.current?.()}
-            >
-              {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Error" : "Save"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-xs"
-              onClick={() => setIsTemplatesOpen(true)}
-            >
-              <LayoutTemplate className="h-3.5 w-3.5" />
-              Templates
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={share.open}>
-              <Share2 className="h-3.5 w-3.5" />
-              Share
-            </Button>
+      <WorkspaceRoomProvider roomId={project.id}>
+        <div className="flex h-screen flex-col overflow-hidden bg-base">
+          <header className="fixed left-0 right-0 top-0 z-50 flex h-12 items-center gap-3 border-b border-border-subtle bg-surface px-3">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsAIPanelOpen((prev) => !prev)}
-              className="text-copy-muted hover:text-copy-primary"
-              aria-label="Toggle AI chat"
+              onClick={() => setIsSidebarOpen((prev) => !prev)}
+              className="shrink-0 text-copy-muted hover:text-copy-primary"
+              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
             >
-              <Sparkles className="h-5 w-5" />
+              {isSidebarOpen ? (
+                <PanelLeftClose className="h-5 w-5" />
+              ) : (
+                <PanelLeftOpen className="h-5 w-5" />
+              )}
             </Button>
+            <span className="min-w-0 flex-1 truncate text-sm font-medium text-copy-primary">
+              {project.name}
+            </span>
+            {saveStatus !== "idle" && (
+              <span
+                aria-live={saveStatus === "error" ? "assertive" : "polite"}
+                aria-atomic="true"
+                className={`flex shrink-0 items-center gap-1 text-xs ${
+                  saveStatus === "error" ? "text-red-400" : "text-copy-muted"
+                }`}
+              >
+                {saveStatus === "saving" && (
+                  <><CloudUpload className="h-3.5 w-3.5 animate-pulse" />Saving…</>
+                )}
+                {saveStatus === "saved" && (
+                  <><Check className="h-3.5 w-3.5" />Saved</>
+                )}
+                {saveStatus === "error" && (
+                  <><CloudOff className="h-3.5 w-3.5" />Save failed</>
+                )}
+              </span>
+            )}
+            <div className="flex shrink-0 items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                disabled={saveStatus === "saving"}
+                onClick={() => saveTriggerRef.current?.()}
+              >
+                {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Error" : "Save"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs"
+                onClick={() => setIsTemplatesOpen(true)}
+              >
+                <LayoutTemplate className="h-3.5 w-3.5" />
+                Templates
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={share.open}>
+                <Share2 className="h-3.5 w-3.5" />
+                Share
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAIPanelOpen((prev) => !prev)}
+                className={cn(
+                  "gap-1.5 text-xs",
+                  isAIPanelOpen && "border-ai/50 bg-ai/15 text-ai-text hover:bg-ai/20"
+                )}
+                aria-label="Toggle AI chat"
+                aria-pressed={isAIPanelOpen}
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                AI Chat
+              </Button>
+            </div>
+          </header>
+
+          <ProjectSidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            myProjects={myProjects}
+            sharedProjects={sharedProjects}
+            onCreateProject={actions.openCreate}
+            onRenameProject={actions.openRename}
+            onDeleteProject={actions.openDelete}
+            activeProjectId={project.id}
+          />
+
+          <div className={`flex flex-1 overflow-hidden pt-12 transition-[padding] duration-200 ${isSidebarOpen ? "sm:pl-72" : ""}`}>
+            <main className="flex min-w-0 flex-1 overflow-hidden bg-base">
+              <CanvasRoom
+                key={project.id}
+                projectId={project.id}
+                loadTemplateRef={loadTemplateRef}
+                saveTriggerRef={saveTriggerRef}
+                onSaveStatusChange={handleSaveStatusChange}
+              />
+            </main>
           </div>
-        </header>
 
-        <ProjectSidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          myProjects={myProjects}
-          sharedProjects={sharedProjects}
-          onCreateProject={actions.openCreate}
-          onRenameProject={actions.openRename}
-          onDeleteProject={actions.openDelete}
-          activeProjectId={project.id}
-        />
-
-        <div className={`flex flex-1 overflow-hidden pt-12 transition-[padding] duration-200 ${isSidebarOpen ? "sm:pl-72" : ""}`}>
-          <main className="flex min-w-0 flex-1 overflow-hidden bg-base">
-            <CanvasRoomWrapper
-              roomId={project.id}
-              loadTemplateRef={loadTemplateRef}
-              saveTriggerRef={saveTriggerRef}
-              onSaveStatusChange={handleSaveStatusChange}
-            />
-          </main>
+          <AISidebar isOpen={isAIPanelOpen} onClose={() => setIsAIPanelOpen(false)} projectId={project.id} />
         </div>
-
-        <AISidebar isOpen={isAIPanelOpen} onClose={() => setIsAIPanelOpen(false)} />
-      </div>
+      </WorkspaceRoomProvider>
 
       <CreateProjectDialog
         open={actions.activeDialog === "create"}

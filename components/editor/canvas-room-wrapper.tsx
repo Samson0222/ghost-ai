@@ -32,13 +32,6 @@ class CanvasErrorBoundary extends React.Component<
   }
 }
 
-interface CanvasRoomWrapperProps {
-  roomId: string;
-  loadTemplateRef?: React.MutableRefObject<LoadTemplateFn | null>;
-  saveTriggerRef?: React.MutableRefObject<ManualSaveFn | null>;
-  onSaveStatusChange?: (status: SaveStatus) => void;
-}
-
 async function authorizeLiveblocksRoom(room?: string) {
   if (!room) {
     throw new Error("Liveblocks room ID is required");
@@ -59,30 +52,53 @@ async function authorizeLiveblocksRoom(room?: string) {
   return await response.json();
 }
 
-export function CanvasRoomWrapper({ roomId, loadTemplateRef, saveTriggerRef, onSaveStatusChange }: CanvasRoomWrapperProps) {
+// Provides Liveblocks + Room context for the whole workspace (canvas + AI sidebar).
+interface WorkspaceRoomProviderProps {
+  roomId: string;
+  children: React.ReactNode;
+}
+
+export function WorkspaceRoomProvider({ roomId, children }: WorkspaceRoomProviderProps) {
   return (
     <LiveblocksProvider authEndpoint={authorizeLiveblocksRoom}>
       <RoomProvider
         id={roomId}
         initialPresence={{ cursor: null, thinking: false }}
       >
-        <CanvasErrorBoundary key={roomId}>
-          <ClientSideSuspense
-            fallback={
-              <div className="flex h-full w-full items-center justify-center">
-                <p className="text-sm text-copy-faint">Connecting…</p>
-              </div>
-            }
-          >
-            <Canvas
-              loadTemplateRef={loadTemplateRef}
-              saveTriggerRef={saveTriggerRef}
-              projectId={roomId}
-              onSaveStatusChange={onSaveStatusChange}
-            />
-          </ClientSideSuspense>
-        </CanvasErrorBoundary>
+        {children}
       </RoomProvider>
     </LiveblocksProvider>
+  );
+}
+
+// Canvas error boundary + suspense wrapper (must be inside WorkspaceRoomProvider).
+interface CanvasRoomProps {
+  projectId: string;
+  loadTemplateRef?: React.MutableRefObject<LoadTemplateFn | null>;
+  saveTriggerRef?: React.MutableRefObject<ManualSaveFn | null>;
+  onSaveStatusChange?: (status: SaveStatus) => void;
+}
+
+export function CanvasRoom({ projectId, loadTemplateRef, saveTriggerRef, onSaveStatusChange }: CanvasRoomProps) {
+  return (
+    <CanvasErrorBoundary>
+      <ClientSideSuspense
+        fallback={
+          <div className="flex h-full w-full items-center justify-center bg-base">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-white" />
+              <span className="text-sm text-white">Connecting…</span>
+            </div>
+          </div>
+        }
+      >
+        <Canvas
+          loadTemplateRef={loadTemplateRef}
+          saveTriggerRef={saveTriggerRef}
+          projectId={projectId}
+          onSaveStatusChange={onSaveStatusChange}
+        />
+      </ClientSideSuspense>
+    </CanvasErrorBoundary>
   );
 }
