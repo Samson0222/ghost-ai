@@ -116,7 +116,7 @@ TRIGGER_SECRET_KEY=tr_dev_xxxxx  # From dashboard > API Keys
 - Check `TRIGGER_SECRET_KEY` is set
 
 ### "Task not registered"
-- Restart `npx trigger dev` after adding new tasks
+- Restart `npx trigger@4 dev` after adding new tasks
 - Tasks must use `task()` or `schemaTask()` from `@trigger.dev/sdk`
 
 ## Next Steps
