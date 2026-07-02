@@ -17,6 +17,7 @@ export function LiveCursors() {
         const screenY = cursor.y * zoom + vpY;
         const color = other.info?.color ?? "#6366f1";
         const name = other.info?.name ?? "Anonymous";
+        const isThinking = other.presence.thinking === true;
 
         return (
           <div
@@ -40,9 +41,15 @@ export function LiveCursors() {
               />
             </svg>
             <div
-              className="absolute whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium text-white shadow"
+              className="absolute flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium text-white shadow"
               style={{ backgroundColor: color, top: "12px", left: "10px" }}
             >
+              {isThinking && (
+                <span
+                  aria-label="thinking"
+                  className="inline-block h-2.5 w-2.5 shrink-0 animate-spin rounded-full border border-white/70 border-t-transparent"
+                />
+              )}
               {name}
             </div>
           </div>

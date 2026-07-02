@@ -133,7 +133,11 @@ function ProjectItem({ project, isActive, onOpen, onRename, onDelete, showOwner 
     <div className={`group flex items-center justify-between rounded-lg ${isActive ? "bg-subtle" : "hover:bg-subtle"}`}>
       <Link
         href={`/editor/${project.id}`}
-        onClick={onOpen}
+        onClick={() => {
+          if (window.matchMedia("(max-width: 639px)").matches) {
+            onOpen?.();
+          }
+        }}
         aria-current={isActive ? "page" : undefined}
         className={`min-w-0 flex-1 truncate px-2 py-1.5 ${isActive ? "font-medium text-copy-primary" : "text-copy-secondary"}`}
       >

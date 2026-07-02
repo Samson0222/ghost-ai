@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   getSmoothStepPath,
   EdgeLabelRenderer,
@@ -36,9 +36,18 @@ export function CanvasEdgeRenderer({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
   const [hovered, setHovered] = useState(false);
-  const { updateEdgeData } = useReactFlow();
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragDelta, setDragDelta] = useState({ dx: 0, dy: 0 });
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const { updateEdgeData, getViewport } = useReactFlow();
 
   const label = data?.label ?? "";
+  const hasLabel = label.length > 0;
+  const storedOffset = data?.labelOffset ?? { dx: 0, dy: 0 };
+  const effectiveOffset = {
+    dx: storedOffset.dx + dragDelta.dx,
+    dy: storedOffset.dy + dragDelta.dy,
+  };
   const isActive = selected || hovered;
 
   const commitEdit = useCallback(() => {
@@ -55,6 +64,45 @@ export function CanvasEdgeRenderer({
   function handleKeyDown(e: React.KeyboardEvent) {
     e.stopPropagation();
     if (e.key === "Enter" || e.key === "Escape") commitEdit();
+  }
+
+  function handleLabelPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (isEditing || !hasLabel) return;
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    setIsDragging(true);
+    setDragDelta({ dx: 0, dy: 0 });
+  }
+
+  function handleLabelPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!isDragging || !dragStartRef.current) return;
+    e.stopPropagation();
+    const { zoom } = getViewport();
+    setDragDelta({
+      dx: (e.clientX - dragStartRef.current.x) / zoom,
+      dy: (e.clientY - dragStartRef.current.y) / zoom,
+    });
+  }
+
+  function handleLabelPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (!isDragging || !dragStartRef.current) return;
+    e.stopPropagation();
+    const { zoom } = getViewport();
+    const finalOffset = {
+      dx: storedOffset.dx + (e.clientX - dragStartRef.current.x) / zoom,
+      dy: storedOffset.dy + (e.clientY - dragStartRef.current.y) / zoom,
+    };
+    dragStartRef.current = null;
+    setIsDragging(false);
+    setDragDelta({ dx: 0, dy: 0 });
+    updateEdgeData(id, { labelOffset: finalOffset });
+  }
+
+  function handleLabelPointerCancel() {
+    dragStartRef.current = null;
+    setIsDragging(false);
+    setDragDelta({ dx: 0, dy: 0 });
   }
 
   const strokeColor = selected ? "#ffffff" : "#f8fafc";
@@ -89,13 +137,18 @@ export function CanvasEdgeRenderer({
         <div
           style={{
             position: "absolute",
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            transform: `translate(-50%, -50%) translate(${labelX + effectiveOffset.dx}px,${labelY + effectiveOffset.dy}px)`,
             pointerEvents: "all",
+            cursor: hasLabel ? (isDragging ? "grabbing" : "grab") : undefined,
           }}
           className="nodrag nopan nowheel"
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           onDoubleClick={startEdit}
+          onPointerDown={handleLabelPointerDown}
+          onPointerMove={handleLabelPointerMove}
+          onPointerUp={handleLabelPointerUp}
+          onPointerCancel={handleLabelPointerCancel}
         >
           {isEditing ? (
             <input

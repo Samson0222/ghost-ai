@@ -26,8 +26,16 @@ export async function POST(request: Request) {
     ? body.name.trim()
     : "Untitled Project";
 
+  // Accept the client-generated human-readable slug (e.g. "my-project-x3k9z").
+  // Validate it strictly: lowercase alphanumeric + hyphens, 3–64 chars, no leading/trailing hyphens.
+  const roomId: string | undefined =
+    typeof body?.roomId === "string" &&
+    /^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(body.roomId)
+      ? body.roomId
+      : undefined;
+
   const project = await prisma.project.create({
-    data: { ownerId: userId, name },
+    data: { ...(roomId ? { id: roomId } : {}), ownerId: userId, name },
   });
 
   return Response.json(project, { status: 201 });

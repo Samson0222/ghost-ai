@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { Check, Copy, Loader2, X } from "lucide-react";
 import { EditorDialog } from "./editor-dialog";
 import { Button } from "@/components/ui/button";
@@ -85,6 +85,20 @@ export function ShareDialog({
   copied,
   onCopyLink,
 }: ShareDialogProps) {
+  const [copiedRoomId, setCopiedRoomId] = useState(false);
+
+  const handleCopyRoomId = useCallback(() => {
+    navigator.clipboard
+      .writeText(projectId)
+      .then(() => {
+        setCopiedRoomId(true);
+        setTimeout(() => setCopiedRoomId(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy room ID:", err);
+      });
+  }, [projectId]);
+
   return (
     <EditorDialog
       open={open}
@@ -116,6 +130,29 @@ export function ShareDialog({
                   <Copy className="h-3.5 w-3.5" />
                   Copy
                 </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Room ID */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium text-copy-muted">Room ID</span>
+          <div className="flex items-center gap-2">
+            <code className="min-w-0 flex-1 truncate rounded-lg border border-border bg-subtle px-2.5 py-1.5 font-mono text-xs text-copy-secondary">
+              {projectId}
+            </code>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyRoomId}
+              className="shrink-0 gap-1.5 text-xs"
+              aria-label="Copy room ID"
+            >
+              {copiedRoomId ? (
+                <><Check className="h-3.5 w-3.5 text-success" />Copied!</>
+              ) : (
+                <><Copy className="h-3.5 w-3.5" />Copy</>
               )}
             </Button>
           </div>

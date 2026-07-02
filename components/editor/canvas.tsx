@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import type { DragEvent } from "react";
 import type React from "react";
 import {
@@ -13,9 +13,10 @@ import {
   useReactFlow,
   useNodes,
   useEdges,
+  type Connection,
 } from "@xyflow/react";
 import { useLiveblocksFlow } from "@liveblocks/react-flow";
-import { useUndo, useRedo, useCanUndo, useCanRedo, useUpdateMyPresence } from "@liveblocks/react";
+import { useUndo, useRedo, useCanUndo, useCanRedo, useUpdateMyPresence, useEventListener } from "@liveblocks/react";
 import { LiveCursors } from "./live-cursors";
 import { PresenceAvatars } from "./presence-avatars";
 import { Minus, Plus, Maximize2, Undo2, Redo2 } from "lucide-react";
@@ -238,6 +239,34 @@ function CanvasContent({ loadTemplateRef, saveTriggerRef, projectId, onSaveStatu
     return () => { saveTriggerRef.current = null; };
   }, [saveTriggerRef, triggerSave]);
 
+  // AI-generated canvas updates are applied via Liveblocks events. Status/thinking
+  // display lives entirely in the AI sidebar (ai-sidebar.tsx) — not on the canvas.
+  useEventListener(({ event }) => {
+    if (event.type === "AI_CANVAS_BATCH") {
+      const parsed = JSON.parse(event.data) as { nodes: CanvasNode[]; edges: CanvasEdge[] };
+      const newNodes = parsed.nodes;
+      const newEdges = parsed.edges;
+
+      if (event.replace) {
+        const curNodes = nodesRef.current;
+        const curEdges = edgesRef.current;
+        onNodesChangeRef.current([
+          ...curNodes.map((n) => ({ type: "remove" as const, id: n.id })),
+          ...newNodes.map((n) => ({ type: "add" as const, item: n })),
+        ]);
+        onEdgesChangeRef.current([
+          ...curEdges.map((e) => ({ type: "remove" as const, id: e.id })),
+          ...newEdges.map((e) => ({ type: "add" as const, item: e })),
+        ]);
+      } else {
+        onNodesChangeRef.current(newNodes.map((n) => ({ type: "add" as const, item: n })));
+        onEdgesChangeRef.current(newEdges.map((e) => ({ type: "add" as const, item: e })));
+      }
+
+      setTimeout(() => instanceRef.current.fitView({ duration: 300 }), 100);
+    }
+  });
+
   // Delete/Backspace removes selected nodes and edges through Liveblocks.
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -289,6 +318,40 @@ function CanvasContent({ loadTemplateRef, saveTriggerRef, projectId, onSaveStatu
 
     wrapperRef.current?.focus({ preventScroll: true });
   }
+
+  const reconnectSuccessful = useRef(true);
+
+  const handleReconnectStart = useCallback(() => {
+    reconnectSuccessful.current = false;
+  }, []);
+
+  const handleReconnect = useCallback(
+    (oldEdge: CanvasEdge, newConnection: Connection) => {
+      reconnectSuccessful.current = true;
+      const updatedEdge: CanvasEdge = {
+        ...oldEdge,
+        source: newConnection.source ?? oldEdge.source,
+        target: newConnection.target ?? oldEdge.target,
+        sourceHandle: newConnection.sourceHandle ?? null,
+        targetHandle: newConnection.targetHandle ?? null,
+      };
+      onEdgesChange([
+        { type: "remove", id: oldEdge.id },
+        { type: "add", item: updatedEdge },
+      ]);
+    },
+    [onEdgesChange]
+  );
+
+  const handleReconnectEnd = useCallback(
+    (_event: MouseEvent | TouchEvent, edge: CanvasEdge) => {
+      if (!reconnectSuccessful.current) {
+        onEdgesChange([{ type: "remove", id: edge.id }]);
+      }
+      reconnectSuccessful.current = true;
+    },
+    [onEdgesChange]
+  );
 
   function insertShapeAtClientPoint(payload: ShapeDragPayload, point: { x: number; y: number }) {
     // Adjust cursor position by grab offset so the node's top-left lands where
@@ -384,6 +447,10 @@ function CanvasContent({ loadTemplateRef, saveTriggerRef, projectId, onSaveStatu
         defaultEdgeOptions={defaultEdgeOptions}
         connectionMode={ConnectionMode.Loose}
         deleteKeyCode={null}
+        reconnectRadius={20}
+        onReconnectStart={handleReconnectStart}
+        onReconnect={handleReconnect}
+        onReconnectEnd={handleReconnectEnd}
         colorMode="dark"
         fitView
       >
@@ -392,6 +459,7 @@ function CanvasContent({ loadTemplateRef, saveTriggerRef, projectId, onSaveStatu
       <LiveCursors />
       <PresenceAvatars />
       <ShapePanel onInsert={handleInsertShape} />
+
       <CanvasControlBar
         onZoomIn={() => instance.zoomIn({ duration: 200 })}
         onZoomOut={() => instance.zoomOut({ duration: 200 })}
