@@ -7,7 +7,7 @@ export const aiStatusFeedPayloadSchema = z.object({
 export type AiStatusFeedPayload = z.infer<typeof aiStatusFeedPayloadSchema>;
 
 export const chatMessageSchema = z.object({
-  sender: z.string(),
+  sender: z.string().min(1),
   role: z.enum(["user", "assistant"]),
   content: z.string().min(1),
   timestamp: z.number(),

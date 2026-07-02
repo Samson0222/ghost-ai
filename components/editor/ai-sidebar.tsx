@@ -19,6 +19,9 @@ import {
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import type { designAgentTask } from "@/trigger/design-agent";
 import { aiStatusFeedPayloadSchema, chatMessageSchema } from "@/types/tasks";
+import { useProjectSpecs } from "@/hooks/use-project-specs";
+import { downloadSpecFile, type ProjectSpecListItem } from "@/lib/specs";
+import { SpecPreviewModal } from "./spec-preview-modal";
 
 const AI_SENDER_NAME = "Ghost AI";
 
@@ -100,6 +103,16 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
   const others = useOthers();
   const updateMyPresence = useUpdateMyPresence();
   const self = useSelf();
+
+  // Specs tab state
+  const { specs, isLoading: specsLoading, error: specsError } = useProjectSpecs(projectId);
+  const [previewSpec, setPreviewSpec] = useState<ProjectSpecListItem | null>(null);
+  const [isSpecPreviewOpen, setIsSpecPreviewOpen] = useState(false);
+
+  const openSpecPreview = useCallback((spec: ProjectSpecListItem) => {
+    setPreviewSpec(spec);
+    setIsSpecPreviewOpen(true);
+  }, []);
 
   // ai-chat Liveblocks feed — created server-side, see AISidebar comment above
   const createFeedMessage = useCreateFeedMessage();
@@ -345,7 +358,7 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
 
           {/* AI Architect Tab */}
           <TabsContent value="architect" className="min-h-0 flex flex-col">
-            <ScrollArea className="flex-1" ref={scrollRef}>
+            <ScrollArea className="flex-1" viewportRef={scrollRef}>
               {feedLoading ? (
                 <div className="flex items-center justify-center gap-2 py-8">
                   <Loader2 className="h-4 w-4 animate-spin text-copy-muted" />
@@ -479,7 +492,7 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
 
           {/* Chat Tab */}
           <TabsContent value="chat" className="min-h-0 flex flex-col">
-            <ScrollArea className="flex-1" ref={chatScrollRef}>
+            <ScrollArea className="flex-1" viewportRef={chatScrollRef}>
               {feedLoading ? (
                 <div className="flex items-center justify-center gap-2 py-8">
                   <Loader2 className="h-4 w-4 animate-spin text-copy-muted" />
@@ -596,32 +609,80 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
           </TabsContent>
 
           {/* Specs Tab */}
-          <TabsContent value="specs" className="flex flex-col gap-4 p-4">
-            <Button className="w-full bg-ai text-white hover:bg-ai/90">
-              Generate Spec
-            </Button>
-
-            <div className="flex gap-3 rounded-2xl border border-border-subtle bg-elevated p-4">
-              <FileText className="mt-0.5 h-5 w-5 shrink-0 text-ai-text" />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-copy-primary">E-commerce Architecture</p>
-                <p className="mt-1 line-clamp-2 text-xs text-copy-muted">
-                  Microservices layout with API gateway, auth service, product catalog, and order processing pipeline.
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled
-                className="h-7 w-7 shrink-0 self-start text-copy-faint"
-                aria-label="Download spec"
-              >
-                <Download className="h-4 w-4" />
+          <TabsContent value="specs" className="min-h-0 flex flex-col">
+            <div className="shrink-0 px-4 pt-4 pb-2">
+              <Button className="w-full bg-ai text-white hover:bg-ai/90">
+                Generate Spec
               </Button>
             </div>
+
+            <ScrollArea className="flex-1">
+              <div className="flex flex-col gap-2 p-4 pt-2">
+                {specsLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-8">
+                    <Loader2 className="h-4 w-4 animate-spin text-copy-muted" />
+                    <span className="text-xs text-copy-muted">Loading specs…</span>
+                  </div>
+                ) : specsError ? (
+                  <p className="py-8 text-center text-xs text-error">{specsError}</p>
+                ) : specs.length === 0 ? (
+                  <div className="flex flex-col items-center gap-2 px-2 py-8 text-center">
+                    <FileText className="h-8 w-8 text-ai-text/60" />
+                    <p className="text-sm font-medium text-copy-primary">No specs yet</p>
+                    <p className="text-xs text-copy-muted">
+                      Generate a spec from your canvas to see it listed here.
+                    </p>
+                  </div>
+                ) : (
+                  specs.map((spec) => (
+                    <div
+                      key={spec.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openSpecPreview(spec)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openSpecPreview(spec);
+                        }
+                      }}
+                      className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border-subtle bg-elevated p-3 text-left transition-colors hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai"
+                    >
+                      <FileText className="mt-0.5 h-4 w-4 shrink-0 text-ai-text" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-medium text-copy-primary">{spec.filename}</p>
+                        <p className="mt-1 text-[10px] text-copy-muted">
+                          {new Date(spec.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0 self-start text-copy-muted hover:text-copy-primary"
+                        aria-label={`Download ${spec.filename}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadSpecFile(projectId, spec.id, spec.filename);
+                        }}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
           </TabsContent>
         </Tabs>
       </aside>
+
+      <SpecPreviewModal
+        open={isSpecPreviewOpen}
+        onOpenChange={setIsSpecPreviewOpen}
+        projectId={projectId}
+        specId={previewSpec?.id ?? null}
+        filename={previewSpec?.filename ?? null}
+      />
     </>
   );
 }

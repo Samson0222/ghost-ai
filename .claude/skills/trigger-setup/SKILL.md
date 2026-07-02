@@ -30,7 +30,7 @@ npm install @trigger.dev/sdk
 ### 2. Initialize Your Project
 
 ```bash
-npx trigger init
+npx trigger@4 init
 ```
 
 This creates:
@@ -67,7 +67,7 @@ export const myFirstTask = task({
 ### 5. Start Development Server
 
 ```bash
-npx trigger dev
+npx trigger@4 dev
 ```
 
 ### 6. Trigger Your Task
@@ -87,7 +87,7 @@ Or from the Trigger.dev dashboard "Test" tab.
 
 ## Project Structure
 
-```
+```text
 your-project/
 ├── trigger.config.ts    # Required - project config
 ├── trigger/             # Required - task files

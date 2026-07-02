@@ -94,6 +94,8 @@ export default defineConfig({
 3. **Access in tasks**:
 
 ```ts
+import { task } from "@trigger.dev/sdk";
+
 export const myTask = task({
   id: "my-task",
   run: async () => {

@@ -88,10 +88,15 @@ export function ShareDialog({
   const [copiedRoomId, setCopiedRoomId] = useState(false);
 
   const handleCopyRoomId = useCallback(() => {
-    navigator.clipboard.writeText(projectId).then(() => {
-      setCopiedRoomId(true);
-      setTimeout(() => setCopiedRoomId(false), 2000);
-    });
+    navigator.clipboard
+      .writeText(projectId)
+      .then(() => {
+        setCopiedRoomId(true);
+        setTimeout(() => setCopiedRoomId(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy room ID:", err);
+      });
   }, [projectId]);
 
   return (

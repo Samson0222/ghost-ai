@@ -119,7 +119,7 @@ export const parentTask = task({
     }
 
     // Quick unwrap (throws on error)
-    const output = await childTask.triggerAndWait({ data: "value" }).unwrap();
+    const output = (await childTask.triggerAndWait({ data: "value" })).unwrap();
 
     // Batch trigger and wait
     const results = await childTask.batchTriggerAndWait([

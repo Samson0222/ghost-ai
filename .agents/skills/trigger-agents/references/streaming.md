@@ -59,6 +59,7 @@ export const processItems = task({
 ```typescript
 import { task } from "@trigger.dev/sdk";
 import { streamText } from "ai";
+import { openai } from "@ai-sdk/openai";
 import { aiOutputStream } from "./streams";
 
 export const generateText = task({

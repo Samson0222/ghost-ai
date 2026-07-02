@@ -427,6 +427,10 @@ export const tracedTask = task({
       { userId: payload.userId }
     );
 
+    if (!user) {
+      throw new Error(`User ${payload.userId} not found`);
+    }
+
     logger.debug("User fetched", { user: user.id });
 
     try {

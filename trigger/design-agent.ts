@@ -1,10 +1,15 @@
-import { task } from "@trigger.dev/sdk";
+import { schemaTask } from "@trigger.dev/sdk";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { getLiveblocks } from "@/lib/liveblocks";
 import { NODE_SHAPES, NODE_COLORS } from "@/types/canvas";
 import type { CanvasNode, CanvasEdge, NodeShape } from "@/types/canvas";
+
+const designAgentPayloadSchema = z.object({
+  prompt: z.string().min(1),
+  roomId: z.string().min(1),
+});
 
 const designSchema = z.object({
   nodes: z.array(
@@ -58,10 +63,13 @@ async function broadcast(
   await lb.broadcastEvent(roomId, event);
 }
 
-export const designAgentTask = task({
+export const designAgentTask = schemaTask({
   id: "design-agent",
   maxDuration: 300,
-  run: async (payload: { prompt: string; roomId: string }) => {
+  schema: designAgentPayloadSchema,
+  retry: { maxAttempts: 3, factor: 2, minTimeoutInMs: 1000, maxTimeoutInMs: 10000 },
+  queue: { concurrencyLimit: 5 },
+  run: async (payload) => {
     const { prompt, roomId } = payload;
     const lb = getLiveblocks();
 
@@ -69,9 +77,11 @@ export const designAgentTask = task({
     await broadcast(lb, roomId, { type: "AI_STATUS", message: "Ghost AI is analyzing your request…" });
 
     try {
-      const google = createGoogleGenerativeAI({
-        apiKey: process.env.GOOGLE_AI_API_KEY ?? "",
-      });
+      const apiKey = process.env.GOOGLE_AI_API_KEY;
+      if (!apiKey) {
+        throw new Error("GOOGLE_AI_API_KEY environment variable is required");
+      }
+      const google = createGoogleGenerativeAI({ apiKey });
 
       await broadcast(lb, roomId, { type: "AI_STATUS", message: "Ghost AI is designing your architecture…" });
 

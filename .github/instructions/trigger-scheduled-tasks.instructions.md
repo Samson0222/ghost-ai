@@ -89,7 +89,7 @@ export async function POST(req: Request) {
 
 ## Cron syntax (no seconds)
 
-```
+```text
 * * * * *
 | | | | └ day of week (0–7 or 1L–7L; 0/7=Sun; L=last)
 | | | └── month (1–12)

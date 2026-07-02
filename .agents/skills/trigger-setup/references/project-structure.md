@@ -64,7 +64,7 @@ src/
 // trigger.config.ts
 export default defineConfig({
   project: "proj_xxxxx",
-  dirs: ["./src/**/tasks"],  // Glob pattern
+  dirs: ["./src/users/tasks", "./src/orders/tasks"],
 });
 ```
 

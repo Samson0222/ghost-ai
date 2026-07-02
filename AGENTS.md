@@ -1152,7 +1152,7 @@ export async function POST(req: Request) {
 
 ## Cron syntax (no seconds)
 
-```
+```text
 * * * * *
 | | | | └ day of week (0–7 or 1L–7L; 0/7=Sun; L=last)
 | | | └── month (1–12)
@@ -1231,6 +1231,7 @@ const triggerToken = await auth.createTriggerPublicToken("my-task", {
 
 ```ts
 import { runs, tasks } from "@trigger.dev/sdk";
+import type { myTask } from "../trigger/tasks";
 
 // Trigger and subscribe
 const handle = await tasks.trigger("my-task", { data: "value" });
@@ -1247,6 +1248,7 @@ for await (const run of runs.subscribeToRunsWithTag("user-123")) {
 }
 
 // Subscribe to batch
+const batchId = "batch_123";
 for await (const run of runs.subscribeToBatch(batchId)) {
   console.log(`Batch run ${run.id}: ${run.status}`);
 }

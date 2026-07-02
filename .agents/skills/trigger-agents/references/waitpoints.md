@@ -13,10 +13,10 @@ const token = await wait.createToken({
 });
 
 // Wait for completion (blocks until resolved)
-const result = await wait.forToken<ApprovalPayload>(token.id);
+const result = await wait.forToken<ApprovalToken>(token.id);
 
 if (result.ok) {
-  console.log(result.output);  // Typed as ApprovalPayload
+  console.log(result.output);  // Typed as ApprovalToken
 } else {
   console.log("Timed out:", result.error);
 }

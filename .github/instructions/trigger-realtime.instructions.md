@@ -47,6 +47,7 @@ const triggerToken = await auth.createTriggerPublicToken("my-task", {
 
 ```ts
 import { runs, tasks } from "@trigger.dev/sdk";
+import type { myTask } from "../trigger/tasks";
 
 // Trigger and subscribe
 const handle = await tasks.trigger("my-task", { data: "value" });
@@ -71,7 +72,7 @@ for await (const run of runs.subscribeToBatch(batchId)) {
 ### Realtime Streams v2 (Recommended)
 
 ```ts
-import { streams, InferStreamType } from "@trigger.dev/sdk";
+import { streams, InferStreamType, task } from "@trigger.dev/sdk";
 
 // 1. Define streams (shared location)
 export const aiStream = streams.define<string>({

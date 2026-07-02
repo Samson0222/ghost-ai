@@ -48,7 +48,7 @@ export const weatherAgent = schemaTask({
 
 ## Schema Requirements
 
-The task **must** use `schemaTask` with a Zod schema:
+The task **must** use `schemaTask` with a schema (Zod, ArkType, or any schema exposing `.toJsonSchema()`):
 
 ```typescript
 // ✅ Works - has schema

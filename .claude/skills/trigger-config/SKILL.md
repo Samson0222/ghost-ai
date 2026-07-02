@@ -163,7 +163,9 @@ extensions: [
 extensions: [
   prismaExtension({ schema: "prisma/schema.prisma", migrate: true }),
   additionalFiles({ files: ["./assets/**"] }),
-  syncEnvVars(async (ctx) => [...envVars]),
+  syncEnvVars(async (ctx) => [
+    { name: "API_KEY", value: await getSecret(ctx.environment) },
+  ]),
 ]
 ```
 

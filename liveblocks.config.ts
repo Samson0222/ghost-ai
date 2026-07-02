@@ -25,11 +25,9 @@ declare global {
       | { type: "AI_CANVAS_BATCH"; data: string; replace: boolean }
       | { type: "AI_FEED"; text?: string };
 
-    ThreadMetadata: {};
-
     FeedMessageData: {
       sender: string;
-      role: "user";
+      role: "user" | "assistant";
       content: string;
       timestamp: number;
     };
