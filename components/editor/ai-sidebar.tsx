@@ -18,7 +18,8 @@ import {
 } from "@liveblocks/react";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import type { designAgentTask } from "@/trigger/design-agent";
-import { aiStatusFeedPayloadSchema, chatMessageSchema } from "@/types/tasks";
+import type { generateSpecTask } from "@/trigger/generate-spec";
+import { aiStatusFeedPayloadSchema, chatMessageSchema, type ChatMessageData } from "@/types/tasks";
 import { useProjectSpecs } from "@/hooks/use-project-specs";
 import { downloadSpecFile, type ProjectSpecListItem } from "@/lib/specs";
 import { SpecPreviewModal } from "./spec-preview-modal";
@@ -75,6 +76,38 @@ function RunSubscriber({
   return null;
 }
 
+// Mounted only while a spec-generation run is active.
+function SpecRunSubscriber({
+  runId,
+  accessToken,
+  onComplete,
+  onError,
+}: {
+  runId: string;
+  accessToken: string;
+  onComplete: (specId: string) => void;
+  onError: (message: string) => void;
+}) {
+  const { run } = useRealtimeRun<typeof generateSpecTask>(runId, { accessToken });
+
+  useEffect(() => {
+    if (!run) return;
+
+    if (run.status === "COMPLETED") {
+      if (run.output) {
+        onComplete(run.output.specId);
+      } else {
+        onError("Spec generation completed but returned no result.");
+      }
+    } else if (run.status === "FAILED" || run.status === "CRASHED") {
+      onError("Spec generation failed. Please try again.");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run?.status]);
+
+  return null;
+}
+
 // The "ai-chat" feed is created server-side in /api/liveblocks-auth before
 // the client ever receives a token to connect with, so by the time this
 // component's hooks run the feed is guaranteed to already exist — no
@@ -105,9 +138,12 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
   const self = useSelf();
 
   // Specs tab state
-  const { specs, isLoading: specsLoading, error: specsError } = useProjectSpecs(projectId);
+  const { specs, isLoading: specsLoading, error: specsError, refetch: refetchSpecs } = useProjectSpecs(projectId);
   const [previewSpec, setPreviewSpec] = useState<ProjectSpecListItem | null>(null);
   const [isSpecPreviewOpen, setIsSpecPreviewOpen] = useState(false);
+  const [isGeneratingSpec, setIsGeneratingSpec] = useState(false);
+  const [specGenError, setSpecGenError] = useState<string | null>(null);
+  const [activeSpecRun, setActiveSpecRun] = useState<ActiveRun | null>(null);
 
   const openSpecPreview = useCallback((spec: ProjectSpecListItem) => {
     setPreviewSpec(spec);
@@ -117,6 +153,83 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
   // ai-chat Liveblocks feed — created server-side, see AISidebar comment above
   const createFeedMessage = useCreateFeedMessage();
   const { messages: feedMessages, isLoading: feedLoading, error: feedError } = useFeedMessages("ai-chat");
+
+  const handleGenerateSpec = useCallback(async () => {
+    if (isGeneratingSpec) return;
+    setIsGeneratingSpec(true);
+    setSpecGenError(null);
+
+    try {
+      const canvasRes = await fetch(`/api/projects/${projectId}/canvas`);
+      const canvasData = canvasRes.ok
+        ? ((await canvasRes.json()) as { canvas: { nodes?: unknown[]; edges?: unknown[] } | null })
+        : { canvas: null };
+
+      const chatHistory: ChatMessageData[] = (feedMessages ?? [])
+        .map((msg) => chatMessageSchema.safeParse(msg.data))
+        .filter((parsed) => parsed.success)
+        .map((parsed) => parsed.data);
+
+      const specRes = await fetch("/api/ai/spec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: projectId,
+          chatHistory,
+          nodes: canvasData.canvas?.nodes ?? [],
+          edges: canvasData.canvas?.edges ?? [],
+        }),
+      });
+
+      if (!specRes.ok) {
+        const err = await specRes.json().catch(() => ({ error: "Request failed" }));
+        setSpecGenError((err as { error?: string }).error ?? "Failed to start spec generation.");
+        setIsGeneratingSpec(false);
+        return;
+      }
+
+      const { runId } = (await specRes.json()) as { runId: string };
+
+      const tokenRes = await fetch("/api/ai/spec/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ runId }),
+      });
+
+      if (!tokenRes.ok) {
+        setSpecGenError("Could not subscribe to spec generation status.");
+        setIsGeneratingSpec(false);
+        return;
+      }
+
+      const { token } = (await tokenRes.json()) as { token: string };
+      setActiveSpecRun({ runId, accessToken: token });
+    } catch {
+      setSpecGenError("Failed to start spec generation. Please try again.");
+      setIsGeneratingSpec(false);
+    }
+  }, [isGeneratingSpec, projectId, feedMessages]);
+
+  const handleSpecRunComplete = useCallback(
+    (specId: string) => {
+      setActiveSpecRun(null);
+      setIsGeneratingSpec(false);
+      refetchSpecs().then(() => {
+        openSpecPreview({
+          id: specId,
+          createdAt: new Date().toISOString(),
+          filename: `spec-${specId}.md`,
+        });
+      });
+    },
+    [refetchSpecs, openSpecPreview]
+  );
+
+  const handleSpecRunError = useCallback((message: string) => {
+    setActiveSpecRun(null);
+    setIsGeneratingSpec(false);
+    setSpecGenError(message);
+  }, []);
 
   // Room-wide AI active: room events (from Trigger task) OR any participant's presence
   const anyThinking =
@@ -307,6 +420,15 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
           accessToken={activeRun.accessToken}
           onMessage={handleRunMessage}
           onComplete={handleRunComplete}
+        />
+      )}
+
+      {activeSpecRun && (
+        <SpecRunSubscriber
+          runId={activeSpecRun.runId}
+          accessToken={activeSpecRun.accessToken}
+          onComplete={handleSpecRunComplete}
+          onError={handleSpecRunError}
         />
       )}
 
@@ -610,10 +732,16 @@ export function AISidebar({ isOpen, onClose, projectId }: AISidebarProps) {
 
           {/* Specs Tab */}
           <TabsContent value="specs" className="min-h-0 flex flex-col">
-            <div className="shrink-0 px-4 pt-4 pb-2">
-              <Button className="w-full bg-ai text-white hover:bg-ai/90">
-                Generate Spec
+            <div className="shrink-0 px-4 pt-8 pb-2">
+              <Button
+                onClick={handleGenerateSpec}
+                disabled={isGeneratingSpec}
+                className="w-full gap-1.5 bg-ai text-white hover:bg-ai/90 focus-visible:border-copy-primary focus-visible:ring-copy-primary/50 disabled:opacity-60"
+              >
+                {isGeneratingSpec && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {isGeneratingSpec ? "Generating…" : "Generate Spec"}
               </Button>
+              {specGenError && <p className="mt-2 text-xs text-error">{specGenError}</p>}
             </div>
 
             <ScrollArea className="flex-1">
