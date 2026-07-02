@@ -1,100 +1,94 @@
-# Fix: Smooth Project Switching
+_🔒 Security & Privacy_ | _🟠 Major_ | _⚡ Quick win_
 
-## Problem Description
+<details>
+<summary>🧩 Analysis chain</summary>
 
-When the user clicks a project in the left sidebar to switch projects, three things happen in quick succession that produce a jarring experience:
+🏁 Script executed:
 
-1. The sidebar immediately slides away (hides).
-2. The canvas area briefly shows a "Connecting…" message.
-3. The sidebar reappears with the new project loaded.
+```shell
+#!/bin/bash
+set -euo pipefail
 
-The expected behaviour is that the sidebar stays visible and stationary throughout the switch, and the canvas area transitions seamlessly to the new project without intrusive loading text.
+file=".claude/skills/trigger-setup/SKILL.md"
 
-## Root Cause Analysis
+echo "== file info =="
+wc -l "$file"
+echo
 
-### Cause 1 — Sidebar closes on every project click (desktop + mobile)
-
-In `components/editor/project-sidebar.tsx`, `ProjectItem` attaches an `onClick` handler to the `<Link>`:
-
-```tsx
-<Link href={`/editor/${project.id}`} onClick={onOpen} ...>
+echo "== relevant lines =="
+nl -ba "$file" | sed -n '1,160p'
 ```
 
-`onOpen` is passed down as `onClose` from `ProjectSidebar`, which in turn is `() => setIsSidebarOpen(false)` in `WorkspaceShell`. Clicking any project link therefore fires `setIsSidebarOpen(false)` immediately — hiding the sidebar before the navigation even starts.
+Repository: Samson0222/ghost-ai
 
-This callback exists to dismiss the mobile overlay (`bg-black/50 sm:hidden`) on small screens. On desktop there is no overlay, so there is no reason to close the sidebar. The fix should scope the callback to mobile only.
+Length of output: 278
 
-### Cause 2 — "Connecting…" flash when the Liveblocks room changes
+---
 
-`WorkspaceRoomProvider` in `components/editor/canvas-room-wrapper.tsx` passes `roomId` into `RoomProvider`. When the user navigates to a different project, `RoomProvider` receives a new `id`, triggers a Liveblocks room disconnect + reconnect, and suspends. `ClientSideSuspense` in `CanvasRoom` renders its fallback:
+🏁 Script executed:
 
-```tsx
-fallback={
-  <div className="flex h-full w-full items-center justify-center">
-    <p className="text-sm text-copy-faint">Connecting…</p>
-  </div>
-}
+```shell
+#!/bin/bash
+set -euo pipefail
+
+file=".claude/skills/trigger-setup/SKILL.md"
+
+echo "== command examples =="
+cat -n "$file" | sed -n '25,130p'
 ```
 
-This text flashes in the canvas area while the new room handshake completes, which typically takes under a second but is visually disruptive.
+Repository: Samson0222/ghost-ai
 
-## Fix Plan
+Length of output: 3017
 
-Two small, targeted changes — one per root cause.
+---
 
-### Fix 1 — Scope the sidebar-close to mobile only (`project-sidebar.tsx`)
 
-In `ProjectItem`, replace the unconditional `onClick={onOpen}` with a handler that only calls `onOpen` when the viewport is below the `sm` breakpoint (640 px). On desktop the sidebar stays open during and after navigation.
 
-```tsx
-// Before
-<Link href={`/editor/${project.id}`} onClick={onOpen} ...>
+</details>
 
-// After
-<Link
-  href={`/editor/${project.id}`}
-  onClick={() => {
-    if (window.matchMedia("(max-width: 639px)").matches) {
-      onOpen?.();
-    }
-  }}
-  ...
->
+**Pin the Trigger.dev CLI commands to an exact version**  
+The setup guide still mixes `npx trigger@4 ...` and `npx trigger dev`; pin every example to the same exact CLI version so copy-paste installs stay reproducible and don’t pull a newer release unexpectedly. (lines 33, 69, 119)
+
+<details>
+<summary>🧰 Tools</summary>
+
+<details>
+<summary>🪛 SkillSpector (2.3.7)</summary>
+
+[warning] 119: [RP1] null: npx commands without a version suffix (e.g. `@1.0.0`) create a rug-pull risk if the upstream server is compromised and publishes a malicious update.
+
+Remediation: Pin the version: npx `@scope/server`@1.2.3
+
+(MCP Rug Pull (RP1))
+
+</details>
+
+</details>
+
+<details>
+<summary>🤖 Prompt for AI Agents</summary>
+
+```
+Verify each finding against current code. Fix only still-valid issues, skip the
+rest with a brief reason, keep changes minimal, and validate.
+
+In @.claude/skills/trigger-setup/SKILL.md around lines 33 - 34, The setup guide
+is inconsistent about the Trigger.dev CLI version, so update every Trigger
+command example to use the same exact pinned version. In the trigger setup skill
+docs, make the examples around the init/dev flows consistent by replacing any
+unpinned `npx trigger dev` usage with the same exact `npx trigger@4 ...` form
+used elsewhere, so the instructions stay reproducible across the whole guide.
 ```
 
-On mobile, the sidebar still closes when a project is clicked (so the black overlay dismisses). On desktop, `isSidebarOpen` remains `true` and the sidebar stays in place throughout the navigation.
+</details>
 
-### Fix 2 — Replace the "Connecting…" fallback with a silent dark background (`canvas-room-wrapper.tsx`)
+<!-- fingerprinting:phantom:triton:quartz -->
 
-The fallback shown while Liveblocks connects should be visually indistinguishable from the empty canvas — a plain dark background with no text. The user sees a momentary dark canvas instead of a loading message, which is far less intrusive.
+<!-- cr-indicator-types:potential_issue -->
 
-```tsx
-// Before
-fallback={
-  <div className="flex h-full w-full items-center justify-center">
-    <p className="text-sm text-copy-faint">Connecting…</p>
-  </div>
-}
+<!-- cr-comment:v1:2ed7ea206d9be9ca8bc174ac -->
 
-// After
-fallback={<div className="h-full w-full bg-base" />}
-```
+_Source: Linters/SAST tools_
 
-The error boundary still shows a human-readable message when the connection genuinely fails (`CanvasErrorBoundary`), so recoverable transient delays are silent while hard failures remain visible.
-
-## Files to Change
-
-| File | Change |
-|------|--------|
-| `components/editor/project-sidebar.tsx` | Scope `onOpen` call to mobile inside `ProjectItem`'s `onClick` |
-| `components/editor/canvas-room-wrapper.tsx` | Replace "Connecting…" suspense fallback with `<div className="h-full w-full bg-base" />` |
-
-No changes to routing, Liveblocks config, `WorkspaceShell`, or canvas logic.
-
-## Acceptance Criteria
-
-- [ ] Clicking a project in the sidebar on desktop does not close or animate the sidebar.
-- [ ] The sidebar remains fully visible and interactive while the new canvas connects.
-- [ ] The canvas area shows a dark background (not "Connecting…" text) during the brief Liveblocks handshake.
-- [ ] On mobile, clicking a project still dismisses the sidebar overlay as before.
-- [ ] `npm run build` passes with no type errors.
+<!-- This is an auto-generated comment by CodeRabbit -->
